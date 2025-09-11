@@ -13,8 +13,20 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      fontFamily: {
+        poppins: ["Poppins"],
+        montserrat: ["Montserrat"]
+      },
+      colors: {
+        background: "#060B15",
+        overlay: "#131620",
+        bd: "#282D37",
+        txt: "#D1D5DB",
+        highlight: "#5E8FDE",
+        "gray-overlay": "#1A222D",
+      }
     },
   },
-  plugins: [],
+  plugins: [require("daisyui"), require("tailwind-scrollbar-hide")],
 };
 export default config;
