@@ -63,6 +63,18 @@ export const sampleIPInstanceHierarchy: IPInstance = {
           color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#0066cc" },
           emoji: "🖥️"
         },
+        ports: {
+          clock: {
+            type: "clock",
+            source: [{type: "*", portType: "*"}],
+            direction: "right"
+          },
+          reset: {
+            type: "signal",
+            source: [{type: "*", portType: "*"}],
+            direction: "right"
+          }
+        },
         cModelLib: { nca: true, ia: false }
       }
     },
@@ -169,7 +181,9 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             updatedAt: new Date(),
           },
           children: [],
-          bindings: {},
+          bindings: [
+            {"to": "heart->clock", "from": "clock"}
+          ],
           data: {},
           memo: "High-performance CPU core",
           createdAt: new Date(),
@@ -502,9 +516,67 @@ export const sampleIPInstanceHierarchy: IPInstance = {
       memo: "Input/Output subsystem",
       createdAt: new Date(),
       updatedAt: new Date(),
+    },
+    {
+      id: 10,
+      name: "heart",
+      hierarchy: "root.heart",
+      modelId: 9,
+      modelVersion: "1.0",
+      parentId: 1,
+      model: {
+        id: 9,
+        type: "HeartController",
+        isSystem: false,
+        isComposite: false,
+        isCustom: true,
+        data: {
+          "1.0": {
+            properties: {
+              "rate": {
+                type: "Number",
+                description: "Heart rate in BPM",
+                constraint: { type: "range", value: { from: 60, to: 200 } },
+                defaultValue: 72,
+                tag: "hw"
+              }
+            },
+            display: {
+              size: { width: 80, height: 60 },
+              color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#ff3366" },
+              emoji: "❤️"
+            },
+            ports: {
+              clock: {
+                type: "clock",
+                source: [{type: "*", portType: "*"}],
+                direction: "left"
+              },
+              beat: {
+                type: "signal",
+                source: [{type: "*", portType: "*"}],
+                direction: "right"
+              }
+            },
+            cModelLib: { nca: false, ia: false }
+          }
+        },
+        ownerGroupId: 1,
+        deleteFlag: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      children: [],
+      bindings: {},
+      data: {},
+      memo: "Heart rate controller",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
   ],
-  bindings: {},
+  bindings: [
+    {"to": "heart->clock", "from": "clock"}
+  ],
   data: {
     properties: {
       "sys_clock_freq": 200,
