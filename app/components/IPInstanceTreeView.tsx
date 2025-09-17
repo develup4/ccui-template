@@ -18,20 +18,20 @@ interface ModelTypeBadgeProps {
 }
 
 function ModelTypeBadge({ modelType, isSystem, isComposite, isCustom }: ModelTypeBadgeProps) {
-  let bgColor = 'bg-gray-500';
-  
+  let badgeClass = 'badge-neutral';
+
   if (isSystem) {
-    bgColor = 'bg-blue-500';
+    badgeClass = 'badge-info';
   } else if (isComposite) {
-    bgColor = 'bg-green-500';
+    badgeClass = 'badge-success';
   } else if (isCustom) {
-    bgColor = 'bg-purple-500';
+    badgeClass = 'badge-secondary';
   }
 
   return (
-    <span className={`px-2 py-1 rounded text-xs font-medium text-white ${bgColor} ml-auto`}>
+    <div className={`badge badge-xs ${badgeClass} ml-auto`}>
       {modelType}
-    </span>
+    </div>
   );
 }
 
@@ -42,7 +42,7 @@ function renderTreeItems(instance: IPInstance): React.ReactNode {
       itemId={instance.hierarchy}
       label={
         <div className="flex items-center justify-between w-full py-1">
-          <span className="font-montserrat text-white">
+          <span className="text-sm font-medium">
             {instance.name}
           </span>
           <ModelTypeBadge
@@ -91,38 +91,54 @@ function renderTreeItems(instance: IPInstance): React.ReactNode {
 
 export default function IPInstanceTreeView({ rootInstance, onSelect }: IPInstanceTreeViewProps) {
   return (
-    <div className="w-full h-full font-montserrat" style={{ backgroundColor: '#060B15' }}>
-      <SimpleTreeView
-        slots={{
-          collapseIcon: ChevronDownIcon,
-          expandIcon: ChevronRightIcon,
-        }}
-        onSelectedItemsChange={(event: React.SyntheticEvent, itemId: string | null) => {
-          if (itemId && onSelect) {
-            onSelect(itemId);
-          }
-        }}
-        sx={{
-          height: '100%',
-          flexGrow: 1,
-          maxWidth: '100%',
-          overflowY: 'auto',
-          backgroundColor: '#060B15',
-          color: 'white',
-          '& .MuiTreeView-root': {
-            backgroundColor: '#060B15',
-          },
-          '& .MuiTreeItem-root': {
-            color: 'white',
-          },
-          '& .MuiSvgIcon-root': {
-            color: 'white',
-            fontSize: '18px',
-          },
-        }}
-      >
-        {renderTreeItems(rootInstance)}
-      </SimpleTreeView>
+    <div className="w-full h-full bg-background">
+      <div className="p-3 border-b border-bd">
+        <h2 className="text-sm font-semibold flex items-center gap-2 text-txt">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-highlight" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+          </svg>
+          Instance Tree
+        </h2>
+      </div>
+      <div className="p-2">
+        <SimpleTreeView
+          slots={{
+            collapseIcon: ChevronDownIcon,
+            expandIcon: ChevronRightIcon,
+          }}
+          onSelectedItemsChange={(event: React.SyntheticEvent, itemId: string | null) => {
+            if (itemId && onSelect) {
+              onSelect(itemId);
+            }
+          }}
+          sx={{
+            height: '100%',
+            flexGrow: 1,
+            maxWidth: '100%',
+            overflowY: 'auto',
+            color: '#D1D5DB',
+            '& .MuiTreeItem-content': {
+              borderRadius: '6px',
+              margin: '2px 0',
+              '&:hover': {
+                backgroundColor: '#1A222D',
+              },
+              '&.Mui-selected': {
+                backgroundColor: '#5E8FDE !important',
+              },
+              '&.Mui-selected:hover': {
+                backgroundColor: '#5E8FDE !important',
+              },
+            },
+            '& .MuiSvgIcon-root': {
+              fontSize: '16px',
+              color: '#D1D5DB',
+            },
+          }}
+        >
+          {renderTreeItems(rootInstance)}
+        </SimpleTreeView>
+      </div>
     </div>
   );
 }

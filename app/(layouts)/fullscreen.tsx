@@ -37,23 +37,23 @@ export default function FullscreenLayout({
   };
 
   return (
-        <div className="w-full h-screen" style={{ backgroundColor: '#060B15' }}>
-            <div className="w-full min-h-[10rem]"></div>
+        <div className="w-full h-screen bg-background">
+            <div className="w-full min-h-[8rem] bg-overlay"></div>
             <div className="size-full flex">
-                <div className="w-[30rem]" style={{ backgroundColor: '#060B15' }}>
-                    <IPInstanceTreeView 
+                <div className="w-[28rem] bg-background border-r border-bd">
+                    <IPInstanceTreeView
                         rootInstance={sampleIPInstanceHierarchy}
                         onSelect={handleNodeSelect}
                     />
                 </div>
                 {children}
-                <div className="w-[30rem]">
-                    <IPInstancePropertyPanel 
+                <div className="w-[28rem] bg-background border-l border-bd">
+                    <IPInstancePropertyPanel
                         selectedInstance={selectedNode}
                         onUpdate={handleInstanceUpdate}
                     />
                 </div>
             </div>
-        </div>  
+        </div>
     );
 }

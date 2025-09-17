@@ -137,7 +137,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             isSystem: false,
             isComposite: false,
             isCustom: false,
-            data: {},
+            data: {
+              "1.5": {
+                properties: {
+                  "clock_speed": {
+                    type: "Number",
+                    description: "CPU core clock speed in GHz",
+                    constraint: { type: "range", value: { from: 1.0, to: 3.5 } },
+                    defaultValue: 2.8,
+                    tag: "hw"
+                  },
+                  "power_state": {
+                    type: "String Select",
+                    description: "Core power state",
+                    constraint: { type: "list", value: ["active", "idle", "sleep"] },
+                    defaultValue: "active",
+                    tag: "sim"
+                  }
+                },
+                display: {
+                  size: { width: 80, height: 60 },
+                  color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#ff6600" },
+                  emoji: "🔥"
+                },
+                cModelLib: { nca: false, ia: false }
+              }
+            },
             ownerGroupId: 1,
             deleteFlag: false,
             createdAt: new Date(),
@@ -163,7 +188,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             isSystem: false,
             isComposite: false,
             isCustom: false,
-            data: {},
+            data: {
+              "1.5": {
+                properties: {
+                  "clock_speed": {
+                    type: "Number",
+                    description: "CPU core clock speed in GHz",
+                    constraint: { type: "range", value: { from: 1.0, to: 3.5 } },
+                    defaultValue: 2.8,
+                    tag: "hw"
+                  },
+                  "power_state": {
+                    type: "String Select",
+                    description: "Core power state",
+                    constraint: { type: "list", value: ["active", "idle", "sleep"] },
+                    defaultValue: "active",
+                    tag: "sim"
+                  }
+                },
+                display: {
+                  size: { width: 80, height: 60 },
+                  color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#ff6600" },
+                  emoji: "🔥"
+                },
+                cModelLib: { nca: false, ia: false }
+              }
+            },
             ownerGroupId: 1,
             deleteFlag: false,
             createdAt: new Date(),
@@ -202,7 +252,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
         isSystem: true,
         isComposite: true,
         isCustom: false,
-        data: {},
+        data: {
+          "3.0": {
+            properties: {
+              "memory_size": {
+                type: "Address",
+                description: "Total memory size",
+                constraint: { type: "range", value: { from: "0x10000000", to: "0x80000000" } },
+                defaultValue: "0x40000000",
+                tag: "hw"
+              },
+              "refresh_rate": {
+                type: "Number",
+                description: "Memory refresh rate in Hz",
+                constraint: { type: "range", value: { from: 60, to: 120 } },
+                defaultValue: 64,
+                tag: "hw"
+              }
+            },
+            display: {
+              size: { width: 100, height: 80 },
+              color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#9966cc" },
+              emoji: "💾"
+            },
+            cModelLib: { nca: true, ia: true }
+          }
+        },
         ownerGroupId: 1,
         deleteFlag: false,
         createdAt: new Date(),
@@ -222,7 +297,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             isSystem: false,
             isComposite: false,
             isCustom: true,
-            data: {},
+            data: {
+              "2.1": {
+                properties: {
+                  "data_width": {
+                    type: "String Select",
+                    description: "Data bus width",
+                    constraint: { type: "list", value: ["32", "64", "128"] },
+                    defaultValue: "64",
+                    tag: "hw"
+                  },
+                  "ecc_enabled": {
+                    type: "Boolean",
+                    description: "Error correction code enabled",
+                    constraint: { type: "None", value: "None" },
+                    defaultValue: true,
+                    tag: "hw"
+                  }
+                },
+                display: {
+                  size: { width: 90, height: 70 },
+                  color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#cc3366" },
+                  emoji: "⚡"
+                },
+                cModelLib: { nca: false, ia: true }
+              }
+            },
             ownerGroupId: 1,
             deleteFlag: false,
             createdAt: new Date(),
@@ -255,7 +355,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
         isSystem: false,
         isComposite: true,
         isCustom: true,
-        data: {},
+        data: {
+          "1.0": {
+            properties: {
+              "port_count": {
+                type: "Number",
+                description: "Number of IO ports",
+                constraint: { type: "range", value: { from: 4, to: 32 } },
+                defaultValue: 16,
+                tag: "hw"
+              },
+              "voltage_level": {
+                type: "String Select",
+                description: "IO voltage level",
+                constraint: { type: "list", value: ["1.8V", "3.3V", "5V"] },
+                defaultValue: "3.3V",
+                tag: "hw"
+              }
+            },
+            display: {
+              size: { width: 110, height: 85 },
+              color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#66cc99" },
+              emoji: "🔌"
+            },
+            cModelLib: { nca: false, ia: false }
+          }
+        },
         ownerGroupId: 1,
         deleteFlag: false,
         createdAt: new Date(),
@@ -275,7 +400,32 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             isSystem: true,
             isComposite: false,
             isCustom: false,
-            data: {},
+            data: {
+              "1.2": {
+                properties: {
+                  "baud_rate": {
+                    type: "String Select",
+                    description: "UART baud rate",
+                    constraint: { type: "list", value: ["9600", "115200", "921600"] },
+                    defaultValue: "115200",
+                    tag: "hw"
+                  },
+                  "parity": {
+                    type: "String Select",
+                    description: "Parity check mode",
+                    constraint: { type: "list", value: ["none", "even", "odd"] },
+                    defaultValue: "none",
+                    tag: "hw"
+                  }
+                },
+                display: {
+                  size: { width: 85, height: 65 },
+                  color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#3399ff" },
+                  emoji: "📡"
+                },
+                cModelLib: { nca: true, ia: false }
+              }
+            },
             ownerGroupId: 1,
             deleteFlag: false,
             createdAt: new Date(),
@@ -301,7 +451,39 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             isSystem: false,
             isComposite: false,
             isCustom: true,
-            data: {},
+            data: {
+              "2.0": {
+                properties: {
+                  "pin_count": {
+                    type: "Number",
+                    description: "Number of GPIO pins",
+                    constraint: { type: "range", value: { from: 8, to: 64 } },
+                    defaultValue: 32,
+                    tag: "hw"
+                  },
+                  "interrupt_support": {
+                    type: "Boolean",
+                    description: "Interrupt support enabled",
+                    constraint: { type: "None", value: "None" },
+                    defaultValue: true,
+                    tag: "hw"
+                  },
+                  "pull_up_config": {
+                    type: "Complex",
+                    description: "Pull-up resistor configuration",
+                    constraint: { type: "None", value: "None" },
+                    defaultValue: { "enabled": true, "resistance": "10k" },
+                    tag: "hw"
+                  }
+                },
+                display: {
+                  size: { width: 95, height: 75 },
+                  color: { port: "#ffffff", title: "#000000", titleFont: "Arial", primary: "#ff9900" },
+                  emoji: "🔗"
+                },
+                cModelLib: { nca: false, ia: true }
+              }
+            },
             ownerGroupId: 1,
             deleteFlag: false,
             createdAt: new Date(),
