@@ -48,6 +48,7 @@ interface IPModelPropertyData {
     description: string;
     constraint: IPModelPropertyConstraintType;
     defaultValue: any;
+    tag: 'sim' | 'hw';
 }
 
 interface IPDisplayColorType {
