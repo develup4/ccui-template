@@ -93,15 +93,12 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
   return (
     <div className="w-full h-full p-3 bg-background overflow-y-auto">
       <div className="space-y-3">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 bg-highlight rounded flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-            </svg>
-          </div>
-          <h1 className="text-lg font-semibold text-txt">Instance Properties</h1>
-        </div>
+        {/* Instance Information - 상단으로 이동 */}
+        <InstanceInfo
+          instance={selectedInstance}
+          rangedPropertiesCount={rangedProperties.size}
+          onUpdate={onUpdate}
+        />
 
         {/* Model Version Selector */}
         <ModelVersionSelector
@@ -117,6 +114,22 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
           onTagChange={setSelectedTag}
           propertyCount={filteredProperties.length}
         />
+
+        {/* Properties Header */}
+        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+              </svg>
+            </div>
+            <h1 className="text-lg font-bold text-txt">Properties</h1>
+            <div className="flex items-center gap-2 ml-auto">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-txt/70 font-medium">Live Configuration</span>
+            </div>
+          </div>
+        </div>
 
         {/* Properties */}
         <div className="space-y-2">
@@ -152,12 +165,6 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
             })
           )}
         </div>
-
-        {/* Instance Information */}
-        <InstanceInfo
-          instance={selectedInstance}
-          rangedPropertiesCount={rangedProperties.size}
-        />
       </div>
     </div>
   );
