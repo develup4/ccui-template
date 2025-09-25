@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -25,6 +25,8 @@ interface IPInstanceFlowPanelProps {
 
 interface FlowNodeData {
   instance: IPInstance;
+  isPortsVisible: boolean;
+  onTogglePorts: () => void;
 }
 
 const getPortColor = (portType: string) => {
@@ -40,7 +42,7 @@ const getPortColor = (portType: string) => {
 };
 
 function CustomNode({ data }: NodeProps<FlowNodeData>) {
-  const { instance } = data;
+  const { instance, isPortsVisible, onTogglePorts } = data;
   const modelData = instance.model.data[instance.modelVersion];
   const display = modelData?.display;
   const ports = modelData?.ports || {};
@@ -52,70 +54,89 @@ function CustomNode({ data }: NodeProps<FlowNodeData>) {
     port.direction === 'right'
   );
 
+  // Generate some sample properties for display
+  const properties = modelData?.properties || {};
+  const propertyEntries = Object.entries(properties).slice(0, 6); // Show max 6 properties
+
   return (
     <div
-      className="relative rounded-lg border-2 border-gray-600 bg-gray-800 min-w-[200px]"
+      className="relative border border-gray-400 bg-gray-900 min-w-[180px]"
       style={{
-        background: 'linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%)',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+        backgroundColor: '#1a1a1a',
+        border: '1px solid #555',
+        borderRadius: '4px',
+        boxShadow: '2px 2px 8px rgba(0,0,0,0.4)'
       }}
     >
+      {/* Header */}
       <div
-        className="px-3 py-2 rounded-t-md text-white text-sm font-semibold flex items-center gap-2"
-        style={{ backgroundColor: display?.color?.primary || '#555555' }}
+        className="px-2 py-1 text-white text-xs font-bold flex items-center gap-1 border-b border-gray-600"
+        style={{
+          backgroundColor: display?.color?.primary || '#FF6B00',
+          color: '#000'
+        }}
       >
-        <span>{display?.emoji || '📦'}</span>
-        <span>{instance.name}</span>
-        <span className="ml-auto text-xs opacity-75">{instance.model.type}</span>
+        <span className="text-xs">{instance.model.type}</span>
+        <button
+          onClick={onTogglePorts}
+          className="ml-auto text-xs hover:bg-black hover:bg-opacity-20 rounded px-1"
+          title={isPortsVisible ? "Hide ports" : "Show ports"}
+        >
+          {isPortsVisible ? '◐' : '○'}
+        </button>
       </div>
 
-      <div className="p-3 space-y-1">
-        {inputPorts.map(([portName, portData]: [string, any], index) => (
-          <div key={`input-${portName}`} className="flex items-center gap-2 text-xs text-gray-300">
-            <Handle
-              type="target"
-              position={Position.Left}
-              id={portName}
-              style={{
-                background: getPortColor(portData.type),
-                border: '2px solid #333',
-                width: '12px',
-                height: '12px',
-                left: '-6px',
-                top: `${45 + index * 20}px`
-              }}
-            />
-            <div
-              className="w-3 h-3 rounded-full border border-gray-500"
-              style={{ backgroundColor: getPortColor(portData.type) }}
-            />
-            <span className="text-gray-300">{portName}</span>
-          </div>
-        ))}
-
-        {outputPorts.map(([portName, portData]: [string, any], index) => (
-          <div key={`output-${portName}`} className="flex items-center justify-end gap-2 text-xs text-gray-300">
-            <span className="text-gray-300">{portName}</span>
-            <div
-              className="w-3 h-3 rounded-full border border-gray-500"
-              style={{ backgroundColor: getPortColor(portData.type) }}
-            />
-            <Handle
-              type="source"
-              position={Position.Right}
-              id={portName}
-              style={{
-                background: getPortColor(portData.type),
-                border: '2px solid #333',
-                width: '12px',
-                height: '12px',
-                right: '-6px',
-                top: `${45 + index * 20}px`
-              }}
-            />
+      {/* Body with property list */}
+      <div className="px-2 py-1 min-h-[60px]">
+        {propertyEntries.map(([propName, propData], index) => (
+          <div key={propName} className="flex items-center justify-between text-xs py-0.5">
+            <span className="text-gray-300 font-mono">{propName}</span>
+            <div className="flex items-center gap-1">
+              <div
+                className="w-2 h-2 rounded-full border border-gray-400"
+                style={{ backgroundColor: getPortColor('data') }}
+              />
+              <span className="text-gray-400 text-xs">S</span>
+            </div>
           </div>
         ))}
       </div>
+
+      {/* Input Handles */}
+      {isPortsVisible && inputPorts.map(([portName, portData], index) => (
+        <Handle
+          key={`input-${portName}`}
+          type="target"
+          position={Position.Left}
+          id={portName}
+          style={{
+            background: getPortColor(portData.type),
+            border: '1px solid #333',
+            width: '8px',
+            height: '8px',
+            left: '-4px',
+            top: `${20 + (index + 1) * 15}px`
+          }}
+        />
+      ))}
+
+      {/* Output Handles */}
+      {isPortsVisible && outputPorts.map(([portName, portData], index) => (
+        <Handle
+          key={`output-${portName}`}
+          type="source"
+          position={Position.Right}
+          id={portName}
+          style={{
+            background: getPortColor(portData.type),
+            border: '1px solid #333',
+            width: '8px',
+            height: '8px',
+            right: '-4px',
+            top: `${20 + (index + 1) * 15}px`
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -218,16 +239,51 @@ function createEdgesFromBindings(rootInstance: IPInstance): Edge[] {
 }
 
 export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPanelProps) {
+  const [portVisibility, setPortVisibility] = useState<Record<string, boolean>>({});
+
+  const togglePorts = useCallback((nodeId: string) => {
+    setPortVisibility(prev => ({
+      ...prev,
+      [nodeId]: !prev[nodeId]
+    }));
+  }, []);
+
   const initialNodes = createNodesFromInstances(rootInstance);
   const initialEdges = createEdgesFromBindings(rootInstance);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    initialNodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        isPortsVisible: portVisibility[node.id] ?? true,
+        onTogglePorts: () => togglePorts(node.id)
+      }
+    }))
+  );
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
+
+  // Update nodes when port visibility changes
+  const updatedNodes = nodes.map(node => ({
+    ...node,
+    data: {
+      ...node.data,
+      isPortsVisible: portVisibility[node.id] ?? true,
+      onTogglePorts: () => togglePorts(node.id)
+    }
+  }));
+
+  // Filter edges based on port visibility
+  const visibleEdges = edges.filter(edge => {
+    const sourceVisible = portVisibility[edge.source] ?? true;
+    const targetVisible = portVisibility[edge.target] ?? true;
+    return sourceVisible && targetVisible;
+  });
 
   return (
     <div className="w-full h-full bg-background border border-bd">
@@ -241,8 +297,8 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
       </div>
       <div className="h-[calc(100%-60px)]">
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={updatedNodes}
+          edges={visibleEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
