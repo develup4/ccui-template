@@ -1,0 +1,115 @@
+{
+  "name": "System Root",
+  "type": "SystemRoot",
+  "properties": {
+    "sys_clock_freq": 200,
+    "debug_mode": true
+  },
+  "ports": [
+    {
+      "name": "clock",
+      "type": "clock"
+    },
+    {
+      "name": "reset",
+      "type": "signal"
+    }
+  ],
+  "components": [
+    {
+      "name": "CPU Cluster",
+      "type": "composite",
+      "properties": {
+        "core_count": "8",
+        "cache_size": "0x00800000",
+        "power_mode": "performance"
+      },
+      "components": [
+        {
+          "name": "ARM Cortex-A78",
+          "type": "ARMCortexA78",
+          "properties": {
+            "clock_speed": 2.8,
+            "power_state": "active"
+          }
+        },
+        {
+          "name": "ARM Cortex-A78",
+          "type": "ARMCortexA78",
+          "properties": {
+            "clock_speed": 2.8,
+            "power_state": "active"
+          }
+        }
+      ],
+      "bindings": {}
+    },
+    {
+      "name": "Memory Subsystem",
+      "type": "composite",
+      "properties": {
+        "memory_size": "0x40000000",
+        "refresh_rate": 64
+      },
+      "components": [
+        {
+          "name": "DDR4 Controller",
+          "type": "custom",
+          "properties": {
+            "data_width": "64",
+            "ecc_enabled": true
+          }
+        }
+      ],
+      "bindings": {}
+    },
+    {
+      "name": "IO Subsystem",
+      "type": "custom",
+      "properties": {
+        "port_count": 16,
+        "voltage_level": "3.3V"
+      },
+      "components": [
+        {
+          "name": "UART Controller",
+          "type": "UARTController",
+          "properties": {
+            "baud_rate": "115200",
+            "parity": "none"
+          }
+        },
+        {
+          "name": "GPIO Controller",
+          "type": "custom",
+          "properties": {
+            "pin_count": 32,
+            "interrupt_support": true,
+            "pull_up_config": {
+              "enabled": true,
+              "resistance": "10k"
+            }
+          }
+        }
+      ],
+      "bindings": {}
+    },
+    {
+      "name": "heart",
+      "type": "custom",
+      "properties": {
+        "rate": 72
+      },
+      "ports": [
+        {
+          "name": "clock",
+          "type": "clock"
+        },
+        {
+          "name": "beat",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}
