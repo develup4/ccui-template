@@ -1,6 +1,6 @@
 {
   "name": "System Root",
-  "type": "SystemRoot",
+  "type": "composite",
   "properties": {
     "sys_clock_freq": 200,
     "debug_mode": true
@@ -112,6 +112,33 @@
           "bypass_mapping": false
         }
       ]
+    }
+  ],
+  "bindings": [
+    {
+      "from": "clock",
+      "to": "heart->clock",
+      "properties": {
+        "crossing": {
+          "value": {
+            "type": {
+              "value": "async"
+            },
+            "fifo_size": {
+              "value": 8
+            },
+            "direction": {
+              "value": "from"
+            },
+            "source_sync": {
+              "value": 100
+            },
+            "sink_sync": {
+              "value": 50
+            }
+          }
+        }
+      }
     }
   ]
 }

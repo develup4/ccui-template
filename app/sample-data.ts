@@ -38,7 +38,7 @@ export const sampleIPInstanceHierarchy: IPInstance = {
     id: 1,
     type: "SystemRoot",
     isSystem: true,
-    isComposite: false,
+    isComposite: true,
     isCustom: false,
     data: {
       "1.0": {
