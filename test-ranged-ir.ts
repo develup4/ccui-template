@@ -9,7 +9,8 @@ console.log(JSON.stringify(singleIR, null, 2));
 console.log('\n=== Test 2: List constraint - CPU Cluster core_count ===');
 const listConstraintIRs = generateIR(
   sampleIPInstanceHierarchy,
-  'root.cpu_cluster::core_count'
+  'root.cpu_cluster::core_count',
+  ["2", "4", "8", "16"]
 );
 console.log(`Generated ${listConstraintIRs.length} IR(s)`);
 console.log(JSON.stringify(listConstraintIRs, null, 2));
