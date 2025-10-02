@@ -25,9 +25,89 @@ interface IRNode {
 /**
  * Generates IR (Intermediate Representation) from IPInstance hierarchy
  * @param ipInstance - Root IPInstance to start generation from
- * @returns IR tree structure
+ * @param rangedParameter - Optional parameter in format "hierarchy::propertyName" to generate multiple IRs
+ * @param rangedValues - Optional array of values to use when constraint is Range or None
+ * @returns Array of IR tree structures (single element if no rangedParameter)
  */
-export function generateIR(ipInstance: IPInstance): IRNode {
+export function generateIR(
+  ipInstance: IPInstance,
+  rangedParameter?: string,
+  rangedValues?: any[]
+): IRNode[] {
+  // If no rangedParameter, generate single IR
+  if (!rangedParameter) {
+    return [generateSingleIR(ipInstance)];
+  }
+
+  // Parse rangedParameter: "hierarchy::propertyName"
+  const [targetHierarchy, propertyName] = rangedParameter.split("::");
+  if (!targetHierarchy || !propertyName) {
+    throw new Error(
+      `Invalid rangedParameter format: ${rangedParameter}. Expected "hierarchy::propertyName"`
+    );
+  }
+
+  // Find the target instance
+  const targetInstance = findInstanceByHierarchy(ipInstance, targetHierarchy);
+  if (!targetInstance) {
+    throw new Error(`Instance with hierarchy "${targetHierarchy}" not found`);
+  }
+
+  // Get the property constraint
+  const modelData = targetInstance.model.data[targetInstance.modelVersion];
+  const propertyData = modelData.properties?.[propertyName];
+
+  if (!propertyData) {
+    throw new Error(
+      `Property "${propertyName}" not found in instance "${targetHierarchy}"`
+    );
+  }
+
+  // Determine values to iterate over
+  let valuesToGenerate: any[];
+
+  if (propertyData.constraint.type === "list") {
+    // Use list constraint values
+    valuesToGenerate = propertyData.constraint.value;
+  } else if (propertyData.constraint.type === "range" || propertyData.constraint.type === "None") {
+    // Use provided rangedValues
+    if (!rangedValues || rangedValues.length === 0) {
+      throw new Error(
+        `rangedValues must be provided for property "${propertyName}" with constraint type "${propertyData.constraint.type}"`
+      );
+    }
+    valuesToGenerate = rangedValues;
+  } else {
+    throw new Error(
+      `Unsupported constraint type: ${propertyData.constraint.type}`
+    );
+  }
+
+  // Generate multiple IRs
+  return valuesToGenerate.map((value) => {
+    // Clone the instance and set the property value
+    const clonedInstance = cloneIPInstance(ipInstance);
+    const clonedTargetInstance = findInstanceByHierarchy(clonedInstance, targetHierarchy)!;
+
+    // Ensure data.properties exists
+    if (!clonedTargetInstance.data) {
+      clonedTargetInstance.data = { properties: {} };
+    }
+    if (!clonedTargetInstance.data.properties) {
+      clonedTargetInstance.data.properties = {};
+    }
+
+    // Set the property value
+    clonedTargetInstance.data.properties[propertyName] = value;
+
+    return generateSingleIR(clonedInstance);
+  });
+}
+
+/**
+ * Generates a single IR from IPInstance
+ */
+function generateSingleIR(ipInstance: IPInstance): IRNode {
   const model = ipInstance.model;
   const modelData = model.data[ipInstance.modelVersion];
 
@@ -56,7 +136,7 @@ export function generateIR(ipInstance: IPInstance): IRNode {
 
   // Generate components (children) if they exist
   if (ipInstance.children && ipInstance.children.length > 0) {
-    ir.components = ipInstance.children.map((child) => generateIR(child));
+    ir.components = ipInstance.children.map((child) => generateSingleIR(child));
   }
 
   // Generate bindings if model is composite
@@ -65,6 +145,34 @@ export function generateIR(ipInstance: IPInstance): IRNode {
   }
 
   return ir;
+}
+
+/**
+ * Finds an IPInstance by hierarchy path
+ */
+function findInstanceByHierarchy(
+  instance: IPInstance,
+  hierarchy: string
+): IPInstance | null {
+  if (instance.hierarchy === hierarchy) {
+    return instance;
+  }
+
+  for (const child of instance.children || []) {
+    const found = findInstanceByHierarchy(child, hierarchy);
+    if (found) {
+      return found;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Deep clone an IPInstance
+ */
+function cloneIPInstance(instance: IPInstance): IPInstance {
+  return JSON.parse(JSON.stringify(instance));
 }
 
 /**
