@@ -42,8 +42,51 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
     );
   }
 
-  const properties = selectedPort.properties || {
-    bypass_mapping: false
+  const properties = selectedPort.properties || {};
+
+  const handleSizeToggle = (enabled: boolean) => {
+    if (!onUpdate) return;
+
+    const updatedPort = {
+      ...selectedPort,
+      properties: {
+        ...properties,
+        size: enabled ? 0 : undefined
+      }
+    };
+
+    onUpdate(updatedPort);
+  };
+
+  const handleSizeChange = (value: string) => {
+    if (!onUpdate) return;
+
+    const numValue = value === '' ? 0 : parseInt(value);
+    const updatedPort = {
+      ...selectedPort,
+      properties: {
+        ...properties,
+        size: numValue
+      }
+    };
+
+    onUpdate(updatedPort);
+  };
+
+  const handleBypassMappingToggle = (enabled: boolean) => {
+    if (!onUpdate) return;
+
+    const updatedPort = {
+      ...selectedPort,
+      properties: enabled ? {
+        ...properties,
+        bypass_mapping: false
+      } : Object.fromEntries(
+        Object.entries(properties).filter(([key]) => key !== 'bypass_mapping')
+      )
+    };
+
+    onUpdate(updatedPort);
   };
 
   const handleBypassMappingChange = (value: boolean) => {
@@ -54,21 +97,6 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       properties: {
         ...properties,
         bypass_mapping: value
-      }
-    };
-
-    onUpdate(updatedPort);
-  };
-
-  const handleSizeChange = (value: string) => {
-    if (!onUpdate) return;
-
-    const numValue = value === '' ? undefined : parseInt(value);
-    const updatedPort = {
-      ...selectedPort,
-      properties: {
-        ...properties,
-        size: numValue
       }
     };
 
@@ -129,6 +157,30 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
     onUpdate(updatedPort);
   };
 
+  const handleMappingToggle = (enabled: boolean) => {
+    if (!onUpdate) return;
+
+    const updatedPort = {
+      ...selectedPort,
+      properties: enabled ? {
+        ...properties,
+        mapping: {
+          value: {
+            base: { value: '' },
+            size: { value: '' },
+            remap: { value: '' },
+            add_offset: { value: '' },
+            remove_offset: { value: false }
+          }
+        }
+      } : Object.fromEntries(
+        Object.entries(properties).filter(([key]) => key !== 'mapping')
+      )
+    };
+
+    onUpdate(updatedPort);
+  };
+
   return (
     <div className="w-full h-full p-3 bg-background overflow-y-auto">
       <div className="space-y-3">
@@ -166,41 +218,68 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
           </div>
         </div>
 
-        {/* Bypass Mapping */}
-        <div className="bg-overlay border border-bd rounded-lg shadow-sm p-4">
-          <label className="flex items-center gap-3 cursor-pointer">
+        {/* Size */}
+        <div className="bg-overlay border border-bd rounded-lg shadow-sm">
+          <div className="p-3 border-b border-bd flex items-center gap-3">
             <input
               type="checkbox"
-              checked={properties.bypass_mapping}
-              onChange={(e) => handleBypassMappingChange(e.target.checked)}
+              checked={properties.size !== undefined}
+              onChange={(e) => handleSizeToggle(e.target.checked)}
               className="w-4 h-4 rounded border-bd bg-background text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
-            <div className="flex-1">
-              <div className="text-sm font-medium text-txt">Bypass Mapping</div>
-              <div className="text-xs text-txt/60">Skip address mapping for this port</div>
+            <span className="text-sm font-medium text-txt">Size</span>
+          </div>
+          {properties.size !== undefined && (
+            <div className="p-3">
+              <input
+                type="number"
+                value={properties.size ?? 0}
+                onChange={(e) => handleSizeChange(e.target.value)}
+                placeholder="Enter size"
+                className="w-full px-3 py-2 bg-background border border-bd rounded-lg text-txt text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </label>
+          )}
         </div>
 
-        {/* Size */}
-        <div className="bg-overlay border border-bd rounded-lg shadow-sm p-4">
-          <label className="block">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-txt">Size</span>
-            </div>
+        {/* Bypass Mapping */}
+        <div className="bg-overlay border border-bd rounded-lg shadow-sm">
+          <div className="p-3 border-b border-bd flex items-center gap-3">
             <input
-              type="number"
-              value={properties.size ?? ''}
-              onChange={(e) => handleSizeChange(e.target.value)}
-              placeholder="Enter size"
-              className="w-full px-3 py-2 bg-background border border-bd rounded-lg text-txt text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="checkbox"
+              checked={'bypass_mapping' in properties}
+              onChange={(e) => handleBypassMappingToggle(e.target.checked)}
+              className="w-4 h-4 rounded border-bd bg-background text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
-          </label>
+            <span className="text-sm font-medium text-txt">Bypass Mapping</span>
+          </div>
+          {'bypass_mapping' in properties && (
+            <div className="p-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={properties.bypass_mapping ?? false}
+                  onChange={(e) => handleBypassMappingChange(e.target.checked)}
+                  className="w-4 h-4 rounded border-bd bg-background text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex-1">
+                  <div className="text-sm text-txt">Enable bypass</div>
+                  <div className="text-xs text-txt/60">Skip address mapping for this port</div>
+                </div>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Mapping Section */}
-        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl shadow-md">
+          <div className="flex items-center gap-3 p-4 border-b border-bd">
+            <input
+              type="checkbox"
+              checked={properties.mapping !== undefined}
+              onChange={(e) => handleMappingToggle(e.target.checked)}
+              className="w-4 h-4 rounded border-bd bg-background text-purple-600 focus:ring-2 focus:ring-purple-500"
+            />
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -209,7 +288,8 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
             <h2 className="text-lg font-bold text-txt">Address Mapping</h2>
           </div>
 
-          <div className="space-y-3">
+          {properties.mapping !== undefined && (
+          <div className="p-4 space-y-3">
             {/* Base */}
             <div className="bg-background/50 border border-bd/50 rounded-lg p-3">
               <label className="block">
@@ -290,6 +370,7 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
               </label>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

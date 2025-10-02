@@ -114,22 +114,13 @@ export default function FullscreenLayout({
     };
   }
 
-  // Sample data for testing
+  // Sample data for testing - properties are optional, demonstrating toggle feature
   const samplePort: IPInstancePort = {
     instanceId: 'top.cpu',
     portName: 'axi_master',
     properties: {
-      bypass_mapping: false,
-      size: 4096,
-      mapping: {
-        value: {
-          base: { value: '0x80000000' },
-          size: { value: '0x1000' },
-          remap: { value: '0x00000000' },
-          add_offset: { value: '0x100' },
-          remove_offset: { value: false }
-        }
-      }
+      // Initially only size is set, others can be toggled on
+      size: 4096
     }
   };
 
@@ -137,25 +128,7 @@ export default function FullscreenLayout({
     from: 'top.cpu.axi_master',
     to: 'top.memory.axi_slave',
     properties: {
-      mapping: {
-        value: {
-          from: {
-            value: [{ value: 0 }, { value: 1 }, { value: 2 }]
-          },
-          to: {
-            value: [{ value: 3 }, { value: 4 }, { value: 5 }]
-          }
-        }
-      },
-      crossing: {
-        value: {
-          type: { value: 'async' },
-          fifo_size: { value: 8 },
-          direction: { value: 'from' },
-          source_sync: { value: 2 },
-          sink_sync: { value: 3 }
-        }
-      }
+      // Initially empty, properties can be toggled on
     }
   };
 

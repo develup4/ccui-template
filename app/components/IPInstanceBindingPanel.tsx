@@ -217,6 +217,51 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
     onUpdate(updatedBinding);
   };
 
+  const handleMappingToggle = (enabled: boolean) => {
+    if (!onUpdate) return;
+
+    const updatedBinding = {
+      ...selectedBinding,
+      properties: enabled ? {
+        ...properties,
+        mapping: {
+          value: {
+            from: { value: [] },
+            to: { value: [] }
+          }
+        }
+      } : Object.fromEntries(
+        Object.entries(properties).filter(([key]) => key !== 'mapping')
+      )
+    };
+
+    onUpdate(updatedBinding);
+  };
+
+  const handleCrossingToggle = (enabled: boolean) => {
+    if (!onUpdate) return;
+
+    const updatedBinding = {
+      ...selectedBinding,
+      properties: enabled ? {
+        ...properties,
+        crossing: {
+          value: {
+            type: { value: 'sync' as const },
+            fifo_size: { value: 0 },
+            direction: { value: 'none' as const },
+            source_sync: { value: 0 },
+            sink_sync: { value: 0 }
+          }
+        }
+      } : Object.fromEntries(
+        Object.entries(properties).filter(([key]) => key !== 'crossing')
+      )
+    };
+
+    onUpdate(updatedBinding);
+  };
+
   const mappingFromValues = properties.mapping?.value?.from?.value || [];
   const mappingToValues = properties.mapping?.value?.to?.value || [];
   const crossing = properties.crossing?.value;
@@ -247,8 +292,14 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
         </div>
 
         {/* Mapping Section */}
-        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl shadow-md">
+          <div className="flex items-center gap-3 p-4 border-b border-bd">
+            <input
+              type="checkbox"
+              checked={properties.mapping !== undefined}
+              onChange={(e) => handleMappingToggle(e.target.checked)}
+              className="w-4 h-4 rounded border-bd bg-background text-purple-600 focus:ring-2 focus:ring-purple-500"
+            />
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -257,7 +308,8 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
             <h2 className="text-lg font-bold text-txt">Bit Mapping</h2>
           </div>
 
-          <div className="space-y-4">
+          {properties.mapping !== undefined && (
+          <div className="p-4 space-y-4">
             {/* From Mapping */}
             <div className="bg-background/50 border border-bd/50 rounded-lg p-3">
               <div className="flex items-center justify-between mb-3">
@@ -328,11 +380,18 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Crossing Section */}
-        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl shadow-md">
+          <div className="flex items-center gap-3 p-4 border-b border-bd">
+            <input
+              type="checkbox"
+              checked={properties.crossing !== undefined}
+              onChange={(e) => handleCrossingToggle(e.target.checked)}
+              className="w-4 h-4 rounded border-bd bg-background text-orange-600 focus:ring-2 focus:ring-orange-500"
+            />
             <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -341,7 +400,8 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
             <h2 className="text-lg font-bold text-txt">Clock Domain Crossing</h2>
           </div>
 
-          <div className="space-y-3">
+          {properties.crossing !== undefined && (
+          <div className="p-4 space-y-3">
             {/* Type */}
             <div className="bg-background/50 border border-bd/50 rounded-lg p-3">
               <label className="block">
@@ -421,6 +481,7 @@ export default function IPInstanceBindingPanel({ selectedBinding, onUpdate }: IP
               </label>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
