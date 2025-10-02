@@ -1,12 +1,25 @@
 import { IPInstance, IPModel } from "../sample-data";
 
+interface IRPort {
+  name: string;
+  type: string;
+  properties?: any;
+  bypass_mapping?: boolean;
+}
+
+interface IRBinding {
+  from: string;
+  to: string;
+  properties?: any;
+}
+
 interface IRNode {
   name: string;
   type: string;
   properties?: { [key: string]: any };
-  ports?: Array<{ name: string; type: string }>;
+  ports?: IRPort[];
   components?: IRNode[];
-  bindings?: any;
+  bindings?: IRBinding[];
 }
 
 /**
@@ -36,7 +49,7 @@ export function generateIR(ipInstance: IPInstance): IRNode {
   }
 
   // Generate ports if they exist
-  const ports = generatePorts(modelData);
+  const ports = generatePorts(ipInstance, modelData);
   if (ports && ports.length > 0) {
     ir.ports = ports;
   }
@@ -48,7 +61,7 @@ export function generateIR(ipInstance: IPInstance): IRNode {
 
   // Generate bindings if model is composite
   if (model.isComposite && ipInstance.bindings) {
-    ir.bindings = ipInstance.bindings;
+    ir.bindings = generateBindings(ipInstance.bindings);
   }
 
   return ir;
@@ -96,21 +109,63 @@ function generateProperties(
 }
 
 /**
- * Generates ports from model data
+ * Generates ports from model and instance data
  */
-function generatePorts(modelData: any): Array<{ name: string; type: string }> | undefined {
+function generatePorts(ipInstance: IPInstance, modelData: any): IRPort[] | undefined {
   if (!modelData.ports) {
     return undefined;
   }
 
-  const ports: Array<{ name: string; type: string }> = [];
+  const ports: IRPort[] = [];
+  const instancePorts = ipInstance.data?.ports || {};
 
   for (const [portName, portData] of Object.entries(modelData.ports)) {
-    ports.push({
+    const port: IRPort = {
       name: portName,
       type: (portData as any).type,
-    });
+    };
+
+    // Add instance-specific port data if available
+    const instancePortData = instancePorts[portName];
+    if (instancePortData) {
+      if (instancePortData.properties) {
+        port.properties = instancePortData.properties;
+      }
+      if (instancePortData.bypass_mapping !== undefined) {
+        port.bypass_mapping = instancePortData.bypass_mapping;
+      }
+    }
+
+    ports.push(port);
   }
 
   return ports.length > 0 ? ports : undefined;
+}
+
+/**
+ * Generates bindings from instance binding data
+ */
+function generateBindings(bindings: any): IRBinding[] | undefined {
+  if (!bindings || (Array.isArray(bindings) && bindings.length === 0)) {
+    return undefined;
+  }
+
+  if (!Array.isArray(bindings)) {
+    return undefined;
+  }
+
+  const irBindings: IRBinding[] = bindings.map((binding: any) => {
+    const irBinding: IRBinding = {
+      from: binding.from,
+      to: binding.to,
+    };
+
+    if (binding.properties) {
+      irBinding.properties = binding.properties;
+    }
+
+    return irBinding;
+  });
+
+  return irBindings.length > 0 ? irBindings : undefined;
 }
