@@ -2,8 +2,12 @@
   "name": "System Root",
   "type": "composite",
   "properties": {
-    "sys_clock_freq": 200,
-    "debug_mode": true
+    "sys_clock_freq": {
+      "value": 200
+    },
+    "debug_mode": {
+      "value": true
+    }
   },
   "ports": [
     {
@@ -20,25 +24,39 @@
       "name": "CPU Cluster",
       "type": "composite",
       "properties": {
-        "core_count": "8",
-        "cache_size": "0x00800000",
-        "power_mode": "performance"
+        "core_count": {
+          "value": "8"
+        },
+        "cache_size": {
+          "value": "0x00800000"
+        },
+        "power_mode": {
+          "value": "performance"
+        }
       },
       "components": [
         {
           "name": "ARM Cortex-A78",
           "type": "ARMCortexA78",
           "properties": {
-            "clock_speed": 3,
-            "power_state": "active"
+            "clock_speed": {
+              "value": 3
+            },
+            "power_state": {
+              "value": "active"
+            }
           }
         },
         {
           "name": "ARM Cortex-A78",
           "type": "ARMCortexA78",
           "properties": {
-            "clock_speed": 2.8,
-            "power_state": "active"
+            "clock_speed": {
+              "value": 2.8
+            },
+            "power_state": {
+              "value": "active"
+            }
           }
         }
       ]
@@ -47,16 +65,24 @@
       "name": "Memory Subsystem",
       "type": "composite",
       "properties": {
-        "memory_size": "0x40000000",
-        "refresh_rate": 64
+        "memory_size": {
+          "value": "0x40000000"
+        },
+        "refresh_rate": {
+          "value": 64
+        }
       },
       "components": [
         {
           "name": "DDR4 Controller",
           "type": "custom",
           "properties": {
-            "data_width": "64",
-            "ecc_enabled": true
+            "data_width": {
+              "value": "64"
+            },
+            "ecc_enabled": {
+              "value": true
+            }
           }
         }
       ]
@@ -65,27 +91,45 @@
       "name": "IO Subsystem",
       "type": "custom",
       "properties": {
-        "port_count": 16,
-        "voltage_level": "3.3V"
+        "port_count": {
+          "value": 16
+        },
+        "voltage_level": {
+          "value": "3.3V"
+        }
       },
       "components": [
         {
           "name": "UART Controller",
           "type": "UARTController",
           "properties": {
-            "baud_rate": "115200",
-            "parity": "none"
+            "baud_rate": {
+              "value": "115200"
+            },
+            "parity": {
+              "value": "none"
+            }
           }
         },
         {
           "name": "GPIO Controller",
           "type": "custom",
           "properties": {
-            "pin_count": 32,
-            "interrupt_support": true,
+            "pin_count": {
+              "value": 32
+            },
+            "interrupt_support": {
+              "value": true
+            },
             "pull_up_config": {
-              "enabled": true,
-              "resistance": "10k"
+              "value": {
+                "enabled": {
+                  "value": true
+                },
+                "resistance": {
+                  "value": "10k"
+                }
+              }
             }
           }
         }
@@ -95,7 +139,9 @@
       "name": "heart",
       "type": "custom",
       "properties": {
-        "rate": 72
+        "rate": {
+          "value": 72
+        }
       },
       "ports": [
         {

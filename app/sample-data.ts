@@ -269,14 +269,14 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             updatedAt: new Date(),
           },
           children: [],
-          bindings: {},
+          bindings: [],
           data: {},
           memo: "High-performance CPU core",
           createdAt: new Date(),
           updatedAt: new Date(),
         }
       ],
-      bindings: {},
+      bindings: [],
       data: {
         properties: {
           "core_count": "8",
@@ -378,14 +378,14 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             updatedAt: new Date(),
           },
           children: [],
-          bindings: {},
+          bindings: [],
           data: {},
           memo: "Custom DDR4 memory controller",
           createdAt: new Date(),
           updatedAt: new Date(),
         }
       ],
-      bindings: {},
+      bindings: [],
       data: {},
       memo: "Memory management subsystem",
       createdAt: new Date(),
@@ -481,7 +481,7 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             updatedAt: new Date(),
           },
           children: [],
-          bindings: {},
+          bindings: [],
           data: {},
           memo: "Serial communication controller",
           createdAt: new Date(),
@@ -539,14 +539,14 @@ export const sampleIPInstanceHierarchy: IPInstance = {
             updatedAt: new Date(),
           },
           children: [],
-          bindings: {},
+          bindings: [],
           data: {},
           memo: "General purpose IO controller",
           createdAt: new Date(),
           updatedAt: new Date(),
         }
       ],
-      bindings: {},
+      bindings: [],
       data: {},
       memo: "Input/Output subsystem",
       createdAt: new Date(),
@@ -602,7 +602,7 @@ export const sampleIPInstanceHierarchy: IPInstance = {
         updatedAt: new Date(),
       },
       children: [],
-      bindings: {},
+      bindings: [],
       data: {
         ports: {
           clock: {

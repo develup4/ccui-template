@@ -81,6 +81,37 @@ function getType(model: IPModel): string {
 }
 
 /**
+ * Wraps a value in {value: ...} format recursively
+ */
+function wrapValue(value: any): any {
+  if (value === null || value === undefined) {
+    return { value };
+  }
+
+  // If it's already wrapped, return as is
+  if (typeof value === 'object' && !Array.isArray(value) && 'value' in value && Object.keys(value).length === 1) {
+    return value;
+  }
+
+  // If it's a primitive (string, number, boolean)
+  if (typeof value !== 'object' || value === null) {
+    return { value };
+  }
+
+  // If it's an array, wrap each element
+  if (Array.isArray(value)) {
+    return { value: value.map(wrapValue) };
+  }
+
+  // If it's an object (Complex type), wrap each property recursively
+  const wrappedObject: any = {};
+  for (const [key, val] of Object.entries(value)) {
+    wrappedObject[key] = wrapValue(val);
+  }
+  return { value: wrappedObject };
+}
+
+/**
  * Generates properties from instance and model data
  */
 function generateProperties(
@@ -101,8 +132,10 @@ function generateProperties(
     const defaultValue = (propertyData as any).defaultValue;
 
     // Use instance value if available, otherwise use default value
-    properties[propertyName] =
-      instanceValue !== undefined ? instanceValue : defaultValue;
+    const rawValue = instanceValue !== undefined ? instanceValue : defaultValue;
+
+    // Wrap the value in {value: ...} format
+    properties[propertyName] = wrapValue(rawValue);
   }
 
   return Object.keys(properties).length > 0 ? properties : undefined;
