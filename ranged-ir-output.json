@@ -1,0 +1,1534 @@
+=== Test 1: No rangedParameter (single IR) ===
+Generated 1 IR(s)
+[
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "8"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]
+
+=== Test 2: List constraint - CPU Cluster core_count ===
+Generated 4 IR(s)
+[
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "2"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "4"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "8"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "16"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]
+
+=== Test 3: Range constraint - Root sys_clock_freq with custom values ===
+Generated 3 IR(s)
+[
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 100
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "8"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 200
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "8"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "System Root",
+    "type": "composite",
+    "properties": {
+      "sys_clock_freq": {
+        "value": 300
+      },
+      "debug_mode": {
+        "value": true
+      }
+    },
+    "ports": [
+      {
+        "name": "clock",
+        "type": "clock"
+      },
+      {
+        "name": "reset",
+        "type": "signal"
+      }
+    ],
+    "components": [
+      {
+        "name": "CPU Cluster",
+        "type": "composite",
+        "properties": {
+          "core_count": {
+            "value": "8"
+          },
+          "cache_size": {
+            "value": "0x00800000"
+          },
+          "power_mode": {
+            "value": "performance"
+          }
+        },
+        "components": [
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 3
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          },
+          {
+            "name": "ARM Cortex-A78",
+            "type": "ARMCortexA78",
+            "properties": {
+              "clock_speed": {
+                "value": 2.8
+              },
+              "power_state": {
+                "value": "active"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Memory Subsystem",
+        "type": "composite",
+        "properties": {
+          "memory_size": {
+            "value": "0x40000000"
+          },
+          "refresh_rate": {
+            "value": 64
+          }
+        },
+        "components": [
+          {
+            "name": "DDR4 Controller",
+            "type": "custom",
+            "properties": {
+              "data_width": {
+                "value": "64"
+              },
+              "ecc_enabled": {
+                "value": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "IO Subsystem",
+        "type": "custom",
+        "properties": {
+          "port_count": {
+            "value": 16
+          },
+          "voltage_level": {
+            "value": "3.3V"
+          }
+        },
+        "components": [
+          {
+            "name": "UART Controller",
+            "type": "UARTController",
+            "properties": {
+              "baud_rate": {
+                "value": "115200"
+              },
+              "parity": {
+                "value": "none"
+              }
+            }
+          },
+          {
+            "name": "GPIO Controller",
+            "type": "custom",
+            "properties": {
+              "pin_count": {
+                "value": 32
+              },
+              "interrupt_support": {
+                "value": true
+              },
+              "pull_up_config": {
+                "value": {
+                  "enabled": {
+                    "value": true
+                  },
+                  "resistance": {
+                    "value": "10k"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "heart",
+        "type": "custom",
+        "properties": {
+          "rate": {
+            "value": 72
+          }
+        },
+        "ports": [
+          {
+            "name": "clock",
+            "type": "clock",
+            "properties": {
+              "size": 32
+            },
+            "bypass_mapping": true
+          },
+          {
+            "name": "beat",
+            "type": "signal",
+            "bypass_mapping": false
+          }
+        ]
+      }
+    ],
+    "bindings": [
+      {
+        "from": "clock",
+        "to": "heart->clock",
+        "properties": {
+          "crossing": {
+            "value": {
+              "type": {
+                "value": "async"
+              },
+              "fifo_size": {
+                "value": 8
+              },
+              "direction": {
+                "value": "from"
+              },
+              "source_sync": {
+                "value": 100
+              },
+              "sink_sync": {
+                "value": 50
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

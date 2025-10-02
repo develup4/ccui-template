@@ -36,7 +36,7 @@ export function generateIR(
 ): IRNode[] {
   // If no rangedParameter, generate single IR
   if (!rangedParameter) {
-    return [generateSingleIR(ipInstance)];
+    return [generateSingleIR(ipInstance, null, null, null)];
   }
 
   // Parse rangedParameter: "hierarchy::propertyName"
@@ -83,31 +83,24 @@ export function generateIR(
     );
   }
 
-  // Generate multiple IRs
+  // Generate multiple IRs with different property values
   return valuesToGenerate.map((value) => {
-    // Clone the instance and set the property value
-    const clonedInstance = cloneIPInstance(ipInstance);
-    const clonedTargetInstance = findInstanceByHierarchy(clonedInstance, targetHierarchy)!;
-
-    // Ensure data.properties exists
-    if (!clonedTargetInstance.data) {
-      clonedTargetInstance.data = { properties: {} };
-    }
-    if (!clonedTargetInstance.data.properties) {
-      clonedTargetInstance.data.properties = {};
-    }
-
-    // Set the property value
-    clonedTargetInstance.data.properties[propertyName] = value;
-
-    return generateSingleIR(clonedInstance);
+    return generateSingleIR(ipInstance, targetHierarchy, propertyName, value);
   });
 }
 
 /**
  * Generates a single IR from IPInstance
+ * @param overrideHierarchy - Hierarchy of instance to override property
+ * @param overrideProperty - Property name to override
+ * @param overrideValue - Value to use for the override
  */
-function generateSingleIR(ipInstance: IPInstance): IRNode {
+function generateSingleIR(
+  ipInstance: IPInstance,
+  overrideHierarchy: string | null,
+  overrideProperty: string | null,
+  overrideValue: any
+): IRNode {
   const model = ipInstance.model;
   const modelData = model.data[ipInstance.modelVersion];
 
@@ -123,7 +116,7 @@ function generateSingleIR(ipInstance: IPInstance): IRNode {
   };
 
   // Generate properties if they exist
-  const properties = generateProperties(ipInstance, modelData);
+  const properties = generateProperties(ipInstance, modelData, overrideHierarchy, overrideProperty, overrideValue);
   if (properties && Object.keys(properties).length > 0) {
     ir.properties = properties;
   }
@@ -136,7 +129,9 @@ function generateSingleIR(ipInstance: IPInstance): IRNode {
 
   // Generate components (children) if they exist
   if (ipInstance.children && ipInstance.children.length > 0) {
-    ir.components = ipInstance.children.map((child) => generateSingleIR(child));
+    ir.components = ipInstance.children.map((child) =>
+      generateSingleIR(child, overrideHierarchy, overrideProperty, overrideValue)
+    );
   }
 
   // Generate bindings if model is composite
@@ -166,13 +161,6 @@ function findInstanceByHierarchy(
   }
 
   return null;
-}
-
-/**
- * Deep clone an IPInstance
- */
-function cloneIPInstance(instance: IPInstance): IPInstance {
-  return JSON.parse(JSON.stringify(instance));
 }
 
 /**
@@ -224,7 +212,10 @@ function wrapValue(value: any): any {
  */
 function generateProperties(
   ipInstance: IPInstance,
-  modelData: any
+  modelData: any,
+  overrideHierarchy: string | null,
+  overrideProperty: string | null,
+  overrideValue: any
 ): { [key: string]: any } | undefined {
   if (!modelData.properties) {
     return undefined;
@@ -235,12 +226,21 @@ function generateProperties(
   for (const [propertyName, propertyData] of Object.entries(
     modelData.properties
   )) {
-    const instanceValue =
-      ipInstance.data?.properties?.[propertyName];
-    const defaultValue = (propertyData as any).defaultValue;
+    let rawValue;
 
-    // Use instance value if available, otherwise use default value
-    const rawValue = instanceValue !== undefined ? instanceValue : defaultValue;
+    // Check if this is the property to override
+    if (
+      overrideHierarchy &&
+      overrideProperty &&
+      ipInstance.hierarchy === overrideHierarchy &&
+      propertyName === overrideProperty
+    ) {
+      rawValue = overrideValue;
+    } else {
+      const instanceValue = ipInstance.data?.properties?.[propertyName];
+      const defaultValue = (propertyData as any).defaultValue;
+      rawValue = instanceValue !== undefined ? instanceValue : defaultValue;
+    }
 
     // Wrap the value in {value: ...} format
     properties[propertyName] = wrapValue(rawValue);
