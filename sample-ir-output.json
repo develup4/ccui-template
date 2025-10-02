@@ -29,7 +29,7 @@
           "name": "ARM Cortex-A78",
           "type": "ARMCortexA78",
           "properties": {
-            "clock_speed": 2.8,
+            "clock_speed": 3,
             "power_state": "active"
           }
         },
@@ -100,11 +100,16 @@
       "ports": [
         {
           "name": "clock",
-          "type": "clock"
+          "type": "clock",
+          "properties": {
+            "size": 32
+          },
+          "bypass_mapping": true
         },
         {
           "name": "beat",
-          "type": "signal"
+          "type": "signal",
+          "bypass_mapping": false
         }
       ]
     }

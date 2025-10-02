@@ -182,9 +182,44 @@ export const sampleIPInstanceHierarchy: IPInstance = {
           },
           children: [],
           bindings: [
-            {"to": "heart->clock", "from": "clock"}
+            {
+              "to": "heart->clock",
+              "from": "clock",
+              "properties": {
+                "mapping": {
+                  "value": {
+                    "from": {
+                      "value": [{"value": 0}, {"value": 31}]
+                    },
+                    "to": {
+                      "value": [{"value": 0}, {"value": 31}]
+                    }
+                  }
+                }
+              }
+            }
           ],
-          data: {},
+          data: {
+            ports: {
+              clock: {
+                properties: {
+                  mapping: {
+                    value: {
+                      base: { value: "0x1000" },
+                      size: { value: "0x100" },
+                      remap: { value: "0x2000" },
+                      add_offset: { value: "0x10" },
+                      remove_offset: { value: false }
+                    }
+                  }
+                },
+                bypass_mapping: false
+              }
+            },
+            properties: {
+              "clock_speed": 3.0
+            }
+          },
           memo: "High-performance CPU core",
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -568,14 +603,40 @@ export const sampleIPInstanceHierarchy: IPInstance = {
       },
       children: [],
       bindings: {},
-      data: {},
+      data: {
+        ports: {
+          clock: {
+            properties: {
+              size: 32
+            },
+            bypass_mapping: true
+          },
+          beat: {
+            bypass_mapping: false
+          }
+        }
+      },
       memo: "Heart rate controller",
       createdAt: new Date(),
       updatedAt: new Date(),
     }
   ],
   bindings: [
-    {"to": "heart->clock", "from": "clock"}
+    {
+      "to": "heart->clock",
+      "from": "clock",
+      "properties": {
+        "crossing": {
+          "value": {
+            "type": {"value": "async"},
+            "fifo_size": {"value": 8},
+            "direction": {"value": "from"},
+            "source_sync": {"value": 100},
+            "sink_sync": {"value": 50}
+          }
+        }
+      }
+    }
   ],
   data: {
     properties: {
