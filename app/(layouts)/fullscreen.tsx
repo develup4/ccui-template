@@ -114,6 +114,51 @@ export default function FullscreenLayout({
     };
   }
 
+  // Sample data for testing
+  const samplePort: IPInstancePort = {
+    instanceId: 'top.cpu',
+    portName: 'axi_master',
+    properties: {
+      bypass_mapping: false,
+      size: 4096,
+      mapping: {
+        value: {
+          base: { value: '0x80000000' },
+          size: { value: '0x1000' },
+          remap: { value: '0x00000000' },
+          add_offset: { value: '0x100' },
+          remove_offset: { value: false }
+        }
+      }
+    }
+  };
+
+  const sampleBinding: IPInstanceBinding = {
+    from: 'top.cpu.axi_master',
+    to: 'top.memory.axi_slave',
+    properties: {
+      mapping: {
+        value: {
+          from: {
+            value: [{ value: 0 }, { value: 1 }, { value: 2 }]
+          },
+          to: {
+            value: [{ value: 3 }, { value: 4 }, { value: 5 }]
+          }
+        }
+      },
+      crossing: {
+        value: {
+          type: { value: 'async' },
+          fifo_size: { value: 8 },
+          direction: { value: 'from' },
+          source_sync: { value: 2 },
+          sink_sync: { value: 3 }
+        }
+      }
+    }
+  };
+
   return (
         <div className="w-full h-screen bg-background">
             <div className="w-full min-h-[8rem] bg-overlay"></div>
@@ -125,25 +170,68 @@ export default function FullscreenLayout({
                     />
                 </div>
                 {children}
-                <div className="w-[28rem] bg-background border-l border-bd">
-                    {selectionType === 'instance' && (
-                      <IPInstancePropertyPanel
-                          selectedInstance={selectedNode}
-                          onUpdate={handleInstanceUpdate}
-                      />
-                    )}
-                    {selectionType === 'port' && (
-                      <IPInstancePortPanel
-                          selectedPort={selectedPort}
-                          onUpdate={handlePortUpdate}
-                      />
-                    )}
-                    {selectionType === 'binding' && (
-                      <IPInstanceBindingPanel
-                          selectedBinding={selectedBinding}
-                          onUpdate={handleBindingUpdate}
-                      />
-                    )}
+                <div className="w-[28rem] bg-background border-l border-bd flex flex-col">
+                    {/* Tab Bar */}
+                    <div className="flex border-b border-bd bg-overlay">
+                      <button
+                        onClick={() => setSelectionType('instance')}
+                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                          selectionType === 'instance'
+                            ? 'bg-background text-txt border-b-2 border-blue-500'
+                            : 'text-txt/60 hover:text-txt hover:bg-background/50'
+                        }`}
+                      >
+                        Instance
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectionType('port');
+                          setSelectedPort(samplePort);
+                        }}
+                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                          selectionType === 'port'
+                            ? 'bg-background text-txt border-b-2 border-blue-500'
+                            : 'text-txt/60 hover:text-txt hover:bg-background/50'
+                        }`}
+                      >
+                        Port
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectionType('binding');
+                          setSelectedBinding(sampleBinding);
+                        }}
+                        className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                          selectionType === 'binding'
+                            ? 'bg-background text-txt border-b-2 border-blue-500'
+                            : 'text-txt/60 hover:text-txt hover:bg-background/50'
+                        }`}
+                      >
+                        Binding
+                      </button>
+                    </div>
+
+                    {/* Panel Content */}
+                    <div className="flex-1 overflow-hidden">
+                      {selectionType === 'instance' && (
+                        <IPInstancePropertyPanel
+                            selectedInstance={selectedNode}
+                            onUpdate={handleInstanceUpdate}
+                        />
+                      )}
+                      {selectionType === 'port' && (
+                        <IPInstancePortPanel
+                            selectedPort={selectedPort}
+                            onUpdate={handlePortUpdate}
+                        />
+                      )}
+                      {selectionType === 'binding' && (
+                        <IPInstanceBindingPanel
+                            selectedBinding={selectedBinding}
+                            onUpdate={handleBindingUpdate}
+                        />
+                      )}
+                    </div>
                 </div>
             </div>
         </div>
