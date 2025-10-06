@@ -24,7 +24,7 @@ interface IPModelPortData {
     direction: DirectionType;
 }
 
-type PropertyType = "String" | "Number" | "String Select" | "Number Select" | "Boolean" | "Address" | "Complex";
+type PropertyType = "String" | "Number" | "String Select" | "Number Select" | "Boolean" | "Address" | "Complex" | "RegisterMap";
 
 interface NoneConstraintType {
     type: "None",

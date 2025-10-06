@@ -523,6 +523,13 @@ export const sampleIPInstanceHierarchy: IPInstance = {
                     constraint: { type: "None", value: "None" },
                     defaultValue: { "enabled": true, "resistance": "10k" },
                     tag: "hw"
+                  },
+                  "register_map": {
+                    type: "RegisterMap",
+                    description: "Register mapping table",
+                    constraint: { type: "None", value: "None" },
+                    defaultValue: Array.from({ length: 100 }, (_, i) => ({ a: `REG_${i}`, b: `0x${(i * 4).toString(16).padStart(4, '0')}`, c: i % 2 === 0 ? 'RW' : 'R', d: `Description for register ${i}` })),
+                    tag: "hw"
                   }
                 },
                 display: {

@@ -1,5 +1,7 @@
 'use client';
 
+import RegisterMapPanel from './RegisterMapPanel';
+
 interface PropertyInputProps {
   propertyKey: string;
   propertyData: any;
@@ -160,6 +162,15 @@ export default function PropertyInput({
                 : 'bg-background border-bd text-txt focus:ring-highlight'
             }`}
             placeholder="Enter JSON object"
+          />
+        );
+
+      case 'RegisterMap':
+        return (
+          <RegisterMapPanel
+            propertyKey={propertyKey}
+            currentValue={currentValue}
+            onValueChange={onValueChange}
           />
         );
 
