@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Define a specific type for a row in the register map
+interface RegisterRow {
+  a: string;
+  b: string;
+  c: string;
+  d: string;
+}
 
 interface RegisterMapPanelProps {
   propertyKey: string;
-  currentValue: any[];
-  onValueChange: (value: any) => void;
+  currentValue: RegisterRow[];
+  onValueChange: (value: RegisterRow[]) => void;
 }
 
 export default function RegisterMapPanel({
@@ -14,11 +22,11 @@ export default function RegisterMapPanel({
   onValueChange,
 }: RegisterMapPanelProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [tableData, setTableData] = useState(currentValue);
-  const [editingCell, setEditingCell] = useState<{ rowIndex: number; field: string } | null>(null);
+  const [tableData, setTableData] = useState<RegisterRow[]>(currentValue);
+  const [editingCell, setEditingCell] = useState<{ rowIndex: number; field: keyof RegisterRow } | null>(null);
 
-  // Sync with parent component's value
-  useState(() => {
+  // Sync with parent component's value when it changes
+  useEffect(() => {
     setTableData(currentValue);
   }, [currentValue]);
 
@@ -30,11 +38,11 @@ export default function RegisterMapPanel({
     );
   }
 
-  const handleCellClick = (rowIndex: number, field: string) => {
+  const handleCellClick = (rowIndex: number, field: keyof RegisterRow) => {
     setEditingCell({ rowIndex, field });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, rowIndex: number, field: string) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, rowIndex: number, field: keyof RegisterRow) => {
     const newData = [...tableData];
     newData[rowIndex] = { ...newData[rowIndex], [field]: e.target.value };
     setTableData(newData);
@@ -55,7 +63,7 @@ export default function RegisterMapPanel({
     }
   };
 
-  const headers = tableData.length > 0 ? Object.keys(tableData[0]) : [];
+  const headers = tableData.length > 0 ? Object.keys(tableData[0]) as (keyof RegisterRow)[] : [];
 
   return (
     <div className="w-full">
