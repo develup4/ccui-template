@@ -1,19 +1,20 @@
 
+import { useSelection } from '../../contexts/SelectionContext';
 import Section from './Section';
-import { IPInstanceBinding } from './types';
+import { IPInstanceBinding } from '../../data-structure';
 
-interface CrossingSectionProps {
-  properties: IPInstanceBinding['properties'];
-  onUpdate: (updatedBinding: IPInstanceBinding) => void;
-  selectedBinding: IPInstanceBinding;
-}
+export default function CrossingSection() {
+  const { selectedEdge, setSelectedEdge } = useSelection();
 
-export default function CrossingSection({ properties, onUpdate, selectedBinding }: CrossingSectionProps) {
+  if (!selectedEdge) {
+    return null;
+  }
+
+  const { properties } = selectedEdge;
+
   const handleCrossingToggle = (enabled: boolean) => {
-    if (!onUpdate) return;
-
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: enabled ? {
         ...properties,
         crossing: {
@@ -30,12 +31,10 @@ export default function CrossingSection({ properties, onUpdate, selectedBinding 
       )
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleCrossingChange = (field: 'type' | 'fifo_size' | 'direction' | 'source_sync' | 'sink_sync', value: any) => {
-    if (!onUpdate) return;
-
     const currentCrossing = properties?.crossing?.value || {
       type: { value: 'sync' as const },
       fifo_size: { value: 0 },
@@ -45,7 +44,7 @@ export default function CrossingSection({ properties, onUpdate, selectedBinding 
     };
 
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         crossing: {
@@ -57,7 +56,7 @@ export default function CrossingSection({ properties, onUpdate, selectedBinding 
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const crossing = properties?.crossing?.value;

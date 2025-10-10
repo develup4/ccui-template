@@ -1,11 +1,13 @@
+import { useSelection } from '../../contexts/SelectionContext';
+import { IPInstanceBinding } from '../../data-structure';
 
-import { IPInstanceBinding } from './types';
+export default function BindingInformation() {
+  const { selectedEdge } = useSelection();
 
-interface BindingInformationProps {
-  selectedBinding: IPInstanceBinding;
-}
+  if (!selectedEdge) {
+    return null;
+  }
 
-export default function BindingInformation({ selectedBinding }: BindingInformationProps) {
   return (
     <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
       <div className="flex items-center gap-3 mb-3">
@@ -19,11 +21,11 @@ export default function BindingInformation({ selectedBinding }: BindingInformati
       <div className="space-y-1 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-txt/60 font-medium">From:</span>
-          <span className="text-txt font-mono">{selectedBinding.from}</span>
+          <span className="text-txt font-mono">{selectedEdge.from}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-txt/60 font-medium">To:</span>
-          <span className="text-txt font-mono">{selectedBinding.to}</span>
+          <span className="text-txt font-mono">{selectedEdge.to}</span>
         </div>
       </div>
     </div>

@@ -1,32 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IPInstance } from '../sample-data';
+import { useSelection } from '../contexts/SelectionContext';
 import PropertyInput from './PropertyInput';
 import ModelVersionSelector from './ModelVersionSelector';
 import PropertyFilter from './PropertyFilter';
 import InstanceInfo from './InstanceInfo';
 
-interface IPInstancePropertyPanelProps {
-  selectedInstance: IPInstance | null;
-  onUpdate?: (updatedInstance: IPInstance) => void;
-}
-
-export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: IPInstancePropertyPanelProps) {
+export default function IPInstancePropertyPanel() {
+  const { selectedNode, setSelectedNode } = useSelection();
   const [selectedTag, setSelectedTag] = useState<'all' | 'sim' | 'hw'>('all');
   const [rangedProperties, setRangedProperties] = useState<Set<string>>(new Set());
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string>('');
 
   useEffect(() => {
-    if (selectedInstance) {
-      const versions = Object.keys(selectedInstance.model.data);
+    if (selectedNode) {
+      const versions = Object.keys(selectedNode.model.data);
       setAvailableVersions(versions);
-      setSelectedVersion(selectedInstance.modelVersion);
+      setSelectedVersion(selectedNode.modelVersion);
     }
-  }, [selectedInstance]);
+  }, [selectedNode]);
 
-  if (!selectedInstance) {
+  if (!selectedNode) {
     return (
       <div className="w-full h-full p-4 flex items-center justify-center bg-background">
         <div className="text-center">
@@ -42,9 +38,9 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
     );
   }
 
-  const currentVersionData = selectedInstance.model.data[selectedVersion];
+  const currentVersionData = selectedNode.model.data[selectedVersion];
   const properties = currentVersionData?.properties || {};
-  const instanceProperties = selectedInstance.data?.properties || {};
+  const instanceProperties = selectedNode.data?.properties || {};
 
   const filteredProperties = Object.entries(properties).filter(([_, propData]: [string, any]) => {
     if (selectedTag === 'all') return true;
@@ -52,12 +48,12 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
   });
 
   const handlePropertyChange = (propertyKey: string, newValue: any) => {
-    if (!selectedInstance || !onUpdate) return;
+    if (!selectedNode) return;
 
     const updatedInstance = {
-      ...selectedInstance,
+      ...selectedNode,
       data: {
-        ...selectedInstance.data,
+        ...selectedNode.data,
         properties: {
           ...instanceProperties,
           [propertyKey]: newValue
@@ -65,19 +61,19 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
       }
     };
 
-    onUpdate(updatedInstance);
+    setSelectedNode(updatedInstance);
   };
 
   const handleVersionChange = (newVersion: string) => {
-    if (!selectedInstance || !onUpdate) return;
+    if (!selectedNode) return;
 
     const updatedInstance = {
-      ...selectedInstance,
+      ...selectedNode,
       modelVersion: newVersion
     };
 
     setSelectedVersion(newVersion);
-    onUpdate(updatedInstance);
+    setSelectedNode(updatedInstance);
   };
 
   const handleRangedPropertyChange = (propertyKey: string, isRanged: boolean) => {
@@ -95,16 +91,16 @@ export default function IPInstancePropertyPanel({ selectedInstance, onUpdate }: 
       <div className="space-y-3">
         {/* Instance Information - 상단으로 이동 */}
         <InstanceInfo
-          instance={selectedInstance}
+          instance={selectedNode}
           rangedPropertiesCount={rangedProperties.size}
-          onUpdate={onUpdate}
+          onUpdate={setSelectedNode}
         />
 
         {/* Model Version Selector */}
         <ModelVersionSelector
           availableVersions={availableVersions}
           selectedVersion={selectedVersion}
-          modelType={selectedInstance.model.type}
+          modelType={selectedNode.model.type}
           onVersionChange={handleVersionChange}
         />
 

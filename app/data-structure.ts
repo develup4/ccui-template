@@ -70,7 +70,9 @@ interface IPInstanceData {
     display: IPInstanceDisplayData;
 }
 
-interface IPInstancePortData {
+export interface IPInstancePort {
+    instanceId: string;
+    portName: string;
     properties?: {
         mapping?: {
             value: {
@@ -93,7 +95,7 @@ interface IPInstanceDisplayData {
     position: {x:number, y:number};
 }
 
-interface IPInstanceBindingData {
+export interface IPInstanceBinding {
     from: string;
     to: string;
     properties?: {

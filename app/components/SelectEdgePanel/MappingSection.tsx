@@ -1,20 +1,21 @@
 
+import { useSelection } from '../../contexts/SelectionContext';
 import Section from './Section';
 import BitMappingInputGroup from './BitMappingInputGroup';
-import { IPInstanceBinding } from './types';
+import { IPInstanceBinding } from '../../data-structure';
 
-interface MappingSectionProps {
-  properties: IPInstanceBinding['properties'];
-  onUpdate: (updatedBinding: IPInstanceBinding) => void;
-  selectedBinding: IPInstanceBinding;
-}
+export default function MappingSection() {
+  const { selectedEdge, setSelectedEdge } = useSelection();
 
-export default function MappingSection({ properties, onUpdate, selectedBinding }: MappingSectionProps) {
+  if (!selectedEdge) {
+    return null;
+  }
+
+  const { properties } = selectedEdge;
+
   const handleMappingToggle = (enabled: boolean) => {
-    if (!onUpdate) return;
-
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: enabled ? {
         ...properties,
         mapping: {
@@ -28,15 +29,13 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       )
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingFromAdd = () => {
-    if (!onUpdate) return;
-
     const currentFrom = properties?.mapping?.value?.from?.value || [];
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -50,18 +49,16 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingFromChange = (index: number, value: string) => {
-    if (!onUpdate) return;
-
     const currentFrom = properties?.mapping?.value?.from?.value || [];
     const newFrom = [...currentFrom];
     newFrom[index] = { value: parseInt(value) || 0 };
 
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -73,17 +70,15 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingFromRemove = (index: number) => {
-    if (!onUpdate) return;
-
     const currentFrom = properties?.mapping?.value?.from?.value || [];
     const newFrom = currentFrom.filter((_, i) => i !== index);
 
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -95,15 +90,13 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingToAdd = () => {
-    if (!onUpdate) return;
-
     const currentTo = properties?.mapping?.value?.to?.value || [];
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -117,18 +110,16 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingToChange = (index: number, value: string) => {
-    if (!onUpdate) return;
-
     const currentTo = properties?.mapping?.value?.to?.value || [];
     const newTo = [...currentTo];
     newTo[index] = { value: parseInt(value) || 0 };
 
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -140,17 +131,15 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const handleMappingToRemove = (index: number) => {
-    if (!onUpdate) return;
-
     const currentTo = properties?.mapping?.value?.to?.value || [];
     const newTo = currentTo.filter((_, i) => i !== index);
 
     const updatedBinding = {
-      ...selectedBinding,
+      ...selectedEdge,
       properties: {
         ...properties,
         mapping: {
@@ -162,7 +151,7 @@ export default function MappingSection({ properties, onUpdate, selectedBinding }
       }
     };
 
-    onUpdate(updatedBinding);
+    setSelectedEdge(updatedBinding);
   };
 
   const mappingFromValues = properties?.mapping?.value?.from?.value || [];

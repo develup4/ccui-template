@@ -1,31 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useSelection } from '../contexts/SelectionContext';
 
-interface IPInstancePort {
-  instanceId: string;
-  portName: string;
-  properties?: {
-    mapping?: {
-      value: {
-        base: { value: string };
-        size: { value: string };
-        remap: { value: string };
-        add_offset: { value: string };
-        remove_offset: { value: boolean };
-      }
-    };
-    size?: number;
-    bypass_mapping: boolean;
-  };
-}
+export default function IPInstancePortPanel() {
+  const { selectedPort, setSelectedPort } = useSelection();
 
-interface IPInstancePortPanelProps {
-  selectedPort: IPInstancePort | null;
-  onUpdate?: (updatedPort: IPInstancePort) => void;
-}
-
-export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstancePortPanelProps) {
   if (!selectedPort) {
     return (
       <div className="w-full h-full p-4 flex items-center justify-center bg-background">
@@ -45,8 +24,6 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
   const properties = selectedPort.properties || {};
 
   const handleSizeToggle = (enabled: boolean) => {
-    if (!onUpdate) return;
-
     const updatedPort = {
       ...selectedPort,
       properties: {
@@ -55,12 +32,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       }
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleSizeChange = (value: string) => {
-    if (!onUpdate) return;
-
     const numValue = value === '' ? 0 : parseInt(value);
     const updatedPort = {
       ...selectedPort,
@@ -70,12 +45,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       }
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleBypassMappingToggle = (enabled: boolean) => {
-    if (!onUpdate) return;
-
     const updatedPort = {
       ...selectedPort,
       properties: enabled ? {
@@ -86,12 +59,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       )
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleBypassMappingChange = (value: boolean) => {
-    if (!onUpdate) return;
-
     const updatedPort = {
       ...selectedPort,
       properties: {
@@ -100,12 +71,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       }
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleMappingChange = (field: 'base' | 'size' | 'remap' | 'add_offset', value: string) => {
-    if (!onUpdate) return;
-
     const currentMapping = properties.mapping?.value || {
       base: { value: '' },
       size: { value: '' },
@@ -127,12 +96,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       }
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleRemoveOffsetChange = (value: boolean) => {
-    if (!onUpdate) return;
-
     const currentMapping = properties.mapping?.value || {
       base: { value: '' },
       size: { value: '' },
@@ -154,12 +121,10 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       }
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   const handleMappingToggle = (enabled: boolean) => {
-    if (!onUpdate) return;
-
     const updatedPort = {
       ...selectedPort,
       properties: enabled ? {
@@ -178,7 +143,7 @@ export default function IPInstancePortPanel({ selectedPort, onUpdate }: IPInstan
       )
     };
 
-    onUpdate(updatedPort);
+    setSelectedPort(updatedPort);
   };
 
   return (
