@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSelection } from '../contexts/SelectionContext';
-import PropertyInput from './PropertyInput';
-import ModelVersionSelector from './ModelVersionSelector';
-import PropertyFilter from './PropertyFilter';
-import InstanceInfo from './InstanceInfo';
+import { useSelection } from '../../contexts/SelectionContext';
+import PropertyList from './PropertyList';
+import ModelVersionSelector from '../ModelVersionSelector';
+import PropertyFilter from '../PropertyFilter';
+import InstanceInfo from '../InstanceInfo';
 
 export default function IPInstancePropertyPanel() {
   const { selectedNode, setSelectedNode } = useSelection();
@@ -89,29 +89,22 @@ export default function IPInstancePropertyPanel() {
   return (
     <div className="w-full h-full p-3 bg-background overflow-y-auto">
       <div className="space-y-3">
-        {/* Instance Information - 상단으로 이동 */}
         <InstanceInfo
           instance={selectedNode}
           rangedPropertiesCount={rangedProperties.size}
           onUpdate={setSelectedNode}
         />
-
-        {/* Model Version Selector */}
         <ModelVersionSelector
           availableVersions={availableVersions}
           selectedVersion={selectedVersion}
           modelType={selectedNode.model.type}
           onVersionChange={handleVersionChange}
         />
-
-        {/* Property Filter */}
         <PropertyFilter
           selectedTag={selectedTag}
           onTagChange={setSelectedTag}
           propertyCount={filteredProperties.length}
         />
-
-        {/* Properties Header */}
         <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-bd rounded-xl p-4 shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
@@ -126,41 +119,12 @@ export default function IPInstancePropertyPanel() {
             </div>
           </div>
         </div>
-
-        {/* Properties */}
-        <div className="space-y-2">
-          {filteredProperties.length === 0 ? (
-            <div className="bg-overlay border border-bd rounded-lg shadow-sm">
-              <div className="p-8 text-center">
-                <div className="w-12 h-12 mx-auto mb-2 opacity-50 text-txt">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
-                </div>
-                <p className="text-txt/60 text-sm">No properties available for the selected filter</p>
-              </div>
-            </div>
-          ) : (
-            filteredProperties.map(([propertyKey, propertyData]: [string, any]) => {
-              const currentValue = instanceProperties[propertyKey];
-              const isModified = currentValue !== undefined && currentValue !== propertyData.defaultValue;
-              const isRanged = rangedProperties.has(propertyKey);
-
-              return (
-                <PropertyInput
-                  key={propertyKey}
-                  propertyKey={propertyKey}
-                  propertyData={propertyData}
-                  currentValue={currentValue !== undefined ? currentValue : propertyData.defaultValue}
-                  isModified={isModified}
-                  isRanged={isRanged}
-                  onValueChange={(value) => handlePropertyChange(propertyKey, value)}
-                  onRangedChange={(ranged) => handleRangedPropertyChange(propertyKey, ranged)}
-                />
-              );
-            })
-          )}
-        </div>
+        <PropertyList
+          filteredProperties={filteredProperties}
+          rangedProperties={rangedProperties}
+          handlePropertyChange={handlePropertyChange}
+          handleRangedPropertyChange={handleRangedPropertyChange}
+        />
       </div>
     </div>
   );
