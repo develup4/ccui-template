@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 import PropertyList from './PropertyList';
 import ModelVersionSelector from '../ModelVersionSelector';
 import PropertyFilter from '../PropertyFilter';
 import InstanceInfo from '../InstanceInfo';
 
 export default function IPInstancePropertyPanel() {
-  const { selectedNode, setSelectedNode } = useSelection();
+  const { selectedNode, setSelectedNode } = useExplorer();
   const [selectedTag, setSelectedTag] = useState<'all' | 'sim' | 'hw'>('all');
   const [rangedProperties, setRangedProperties] = useState<Set<string>>(new Set());
   const [availableVersions, setAvailableVersions] = useState<string[]>([]);
@@ -50,30 +50,21 @@ export default function IPInstancePropertyPanel() {
   const handlePropertyChange = (propertyKey: string, newValue: any) => {
     if (!selectedNode) return;
 
-    const updatedInstance = {
-      ...selectedNode,
-      data: {
-        ...selectedNode.data,
-        properties: {
-          ...instanceProperties,
-          [propertyKey]: newValue
-        }
-      }
-    };
+    // Direct mutation for optimistic update
+    selectedNode.data.properties[propertyKey] = newValue;
 
-    setSelectedNode(updatedInstance);
+    // Trigger re-render and server sync
+    setSelectedNode(selectedNode);
   };
 
   const handleVersionChange = (newVersion: string) => {
     if (!selectedNode) return;
 
-    const updatedInstance = {
-      ...selectedNode,
-      modelVersion: newVersion
-    };
+    // Direct mutation for optimistic update
+    selectedNode.modelVersion = newVersion;
 
     setSelectedVersion(newVersion);
-    setSelectedNode(updatedInstance);
+    setSelectedNode(selectedNode);
   };
 
   const handleRangedPropertyChange = (propertyKey: string, isRanged: boolean) => {

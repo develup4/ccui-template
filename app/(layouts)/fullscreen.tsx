@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import IPInstanceTreeView from '../components/IPInstanceTreeView';
 import IPInstancePropertyPanel from '../components/IPInstancePropertyPanel';
 import IPInstancePortPanel from '../components/IPInstancePortPanel';
-import SelectEdgePanel from '../components/SelectEdgePanel';
+import IPInstanceBindingPanel from '../components/IPInstanceBindingPanel';
 import { sampleIPInstanceHierarchy, IPInstance } from '../sample-data';
 import { IPInstancePort, IPInstanceBinding } from '../data-structure';
-import { SelectionContext } from '../contexts/SelectionContext';
+import { ExplorerContext } from '../contexts/ExplorerContext';
 
 type SelectionType = 'instance' | 'port' | 'edge';
 
@@ -17,9 +17,10 @@ export default function FullscreenLayout({
   children: React.ReactNode;
 }>) {
   const [selectionType, setSelectionType] = useState<SelectionType>('instance');
-  const [selectedNode, setSelectedNode] = useState<IPInstance | null>(null);
-  const [selectedPort, setSelectedPort] = useState<IPInstancePort | null>(null);
-  const [selectedEdge, setSelectedEdge] = useState<IPInstanceBinding | null>(null);
+  const [selectedNode, setSelectedNodeState] = useState<IPInstance | null>(null);
+  const [selectedPort, setSelectedPortState] = useState<IPInstancePort | null>(null);
+  const [selectedBinding, setSelectedBindingState] = useState<IPInstanceBinding | null>(null);
+  const [updateTrigger, setUpdateTrigger] = useState(0);
 
   // Helper function to find instance by hierarchy
   const findInstanceByHierarchy = (instance: IPInstance, hierarchy: string): IPInstance | null => {
@@ -37,18 +38,58 @@ export default function FullscreenLayout({
 
   const handleNodeSelect = (hierarchy: string) => {
     const instance = findInstanceByHierarchy(sampleIPInstanceHierarchy, hierarchy);
-    setSelectedNode(instance);
+    setSelectedNodeState(instance);
     setSelectionType('instance');
   };
+
+  // Wrapper functions that trigger server action after state update
+  const setSelectedNode = useCallback((node: IPInstance | null) => {
+    setSelectedNodeState(node);
+    setUpdateTrigger(prev => prev + 1);
+
+    if (node) {
+      // TODO: Call server action to update IPInstance
+      // await updateIPInstance(node);
+    }
+  }, []);
+
+  const setSelectedPort = useCallback((port: IPInstancePort | null) => {
+    setSelectedPortState(port);
+    setUpdateTrigger(prev => prev + 1);
+
+    if (port && selectedNode) {
+      // TODO: Call server action to update IPInstance with port changes
+      // await updateIPInstance(selectedNode);
+    }
+  }, [selectedNode]);
+
+  const setSelectedBinding = useCallback((binding: IPInstanceBinding | null) => {
+    setSelectedBindingState(binding);
+    setUpdateTrigger(prev => prev + 1);
+
+    if (binding && selectedNode) {
+      // TODO: Call server action to update IPInstance with binding changes
+      // await updateIPInstance(selectedNode);
+    }
+  }, [selectedNode]);
+
+  const triggerUpdate = useCallback(() => {
+    setUpdateTrigger(prev => prev + 1);
+
+    if (selectedNode) {
+      // TODO: Call server action to update IPInstance
+      // await updateIPInstance(selectedNode);
+    }
+  }, [selectedNode]);
 
   // These will be exposed globally so canvas can trigger port/binding selection
   if (typeof window !== 'undefined') {
     (window as any).selectPort = (port: IPInstancePort) => {
-      setSelectedPort(port);
+      setSelectedPortState(port);
       setSelectionType('port');
     };
-    (window as any).selectEdge = (binding: IPInstanceBinding) => {
-      setSelectedEdge(binding);
+    (window as any).selectBinding = (binding: IPInstanceBinding) => {
+      setSelectedBindingState(binding);
       setSelectionType('edge');
     };
   }
@@ -64,7 +105,7 @@ export default function FullscreenLayout({
     }
   };
 
-  const sampleEdge: IPInstanceBinding = {
+  const sampleBinding: IPInstanceBinding = {
     from: 'top.cpu.axi_master',
     to: 'top.memory.axi_slave',
     properties: {
@@ -73,7 +114,17 @@ export default function FullscreenLayout({
   };
 
   return (
-    <SelectionContext.Provider value={{ selectedNode, setSelectedNode, selectedPort, setSelectedPort, selectedEdge, setSelectedEdge }}>
+    <ExplorerContext.Provider
+      value={{
+        selectedNode,
+        setSelectedNode,
+        selectedPort,
+        setSelectedPort,
+        selectedBinding,
+        setSelectedBinding,
+        triggerUpdate
+      }}
+    >
         <div className="w-full h-screen bg-background">
             <div className="w-full min-h-[8rem] bg-overlay"></div>
             <div className="size-full flex">
@@ -100,7 +151,7 @@ export default function FullscreenLayout({
                       <button
                         onClick={() => {
                           setSelectionType('port');
-                          setSelectedPort(samplePort);
+                          setSelectedPortState(samplePort);
                         }}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                           selectionType === 'port'
@@ -113,7 +164,7 @@ export default function FullscreenLayout({
                       <button
                         onClick={() => {
                           setSelectionType('edge');
-                          setSelectedEdge(sampleEdge);
+                          setSelectedBindingState(sampleBinding);
                         }}
                         className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                           selectionType === 'edge'
@@ -134,12 +185,12 @@ export default function FullscreenLayout({
                         <IPInstancePortPanel />
                       )}
                       {selectionType === 'edge' && (
-                        <SelectEdgePanel />
+                        <IPInstanceBindingPanel />
                       )}
                     </div>
                 </div>
             </div>
         </div>
-    </SelectionContext.Provider>
+    </ExplorerContext.Provider>
     );
 }

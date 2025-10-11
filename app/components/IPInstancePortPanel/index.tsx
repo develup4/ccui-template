@@ -1,12 +1,12 @@
 'use client';
 
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 import PortInformation from './PortInformation';
 import PortConfiguration from './PortConfiguration';
 import AddressMapping from './AddressMapping';
 
 export default function IPInstancePortPanel() {
-    const { selectedPort } = useSelection();
+    const { selectedPort } = useExplorer();
 
     if (!selectedPort) {
         return (

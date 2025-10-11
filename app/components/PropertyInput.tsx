@@ -1,6 +1,7 @@
 'use client';
 
 import RegisterMapPanel from './RegisterMapPanel';
+import SettingItem from './SettingItem';
 
 interface PropertyInputProps {
   propertyKey: string;
@@ -21,31 +22,9 @@ export default function PropertyInput({
   onValueChange,
   onRangedChange
 }: PropertyInputProps) {
-  const renderConstraintTooltip = () => {
-    const { constraint } = propertyData;
-    if (constraint.type === 'None') return null;
-
-    let tooltipText = '';
-    if (constraint.type === 'range') {
-      tooltipText = `Range: ${constraint.value.from} - ${constraint.value.to}`;
-    } else if (constraint.type === 'list') {
-      tooltipText = `Options: ${constraint.value.join(', ')}`;
-    }
-
-    return (
-      <div className="tooltip tooltip-left" data-tip={tooltipText}>
-        <span className="text-warning cursor-help text-xs">ⓘ</span>
-      </div>
-    );
-  };
-
   const renderInput = () => {
     const { type, constraint } = propertyData;
-    const baseClassName = `px-3 py-2 text-sm w-full border rounded focus:outline-none focus:ring-2 ${
-      isModified
-        ? 'bg-orange-900/20 border-orange-600/50 text-orange-200 focus:ring-orange-500'
-        : 'bg-background border-bd text-txt focus:ring-highlight'
-    }`;
+    const baseClassName = `px-3 py-2 text-sm w-full border rounded focus:outline-none focus:ring-2 bg-background border-bd text-txt focus:ring-blue-500`;
 
     switch (type) {
       case 'String':
@@ -125,7 +104,7 @@ export default function PropertyInput({
 
         return (
           <div className="flex w-full">
-            <span className="px-3 py-2 bg-gray-overlay border border-r-0 border-bd rounded-l text-xs text-txt flex items-center">
+            <span className="px-3 py-2 bg-overlay border border-r-0 border-bd rounded-l text-xs text-txt flex items-center">
               0x
             </span>
             <input
@@ -133,11 +112,7 @@ export default function PropertyInput({
               value={addressValue.replace('0x', '')}
               onChange={handleAddressChange}
               maxLength={8}
-              className={`flex-1 px-3 py-2 text-sm border rounded-r focus:outline-none focus:ring-2 ${
-                isModified
-                  ? 'bg-orange-900/20 border-orange-600/50 text-orange-200 focus:ring-orange-500'
-                  : 'bg-background border-bd text-txt focus:ring-highlight'
-              }`}
+              className="flex-1 px-3 py-2 text-sm border rounded-r focus:outline-none focus:ring-2 bg-background border-bd text-txt focus:ring-blue-500"
               placeholder="00000000"
             />
           </div>
@@ -156,11 +131,7 @@ export default function PropertyInput({
               }
             }}
             rows={3}
-            className={`px-3 py-2 text-sm w-full border rounded focus:outline-none focus:ring-2 ${
-              isModified
-                ? 'bg-orange-900/20 border-orange-600/50 text-orange-200 focus:ring-orange-500'
-                : 'bg-background border-bd text-txt focus:ring-highlight'
-            }`}
+            className={baseClassName}
             placeholder="Enter JSON object"
           />
         );
@@ -187,52 +158,38 @@ export default function PropertyInput({
   };
 
   return (
-    <div className="bg-overlay border border-bd rounded-lg shadow-sm">
-      <div className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <h4 className="text-sm font-medium text-txt">{propertyKey}</h4>
-            {renderConstraintTooltip()}
-          </div>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <span className="text-xs text-txt">Ranged</span>
-            <input
-              type="checkbox"
-              checked={isRanged}
-              onChange={(e) => onRangedChange(e.target.checked)}
-              className="w-3 h-3 text-highlight bg-background border-bd rounded focus:ring-highlight focus:ring-1"
-            />
-          </label>
-        </div>
-
-        {propertyData.description && (
-          <p className="text-xs text-txt/70 mb-2">{propertyData.description}</p>
-        )}
-
-        {renderInput()}
-
-        {isModified && (
-          <div className="flex items-center gap-2 p-2 mt-2 bg-orange-900/20 border border-orange-600/30 rounded">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.314 19c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <span className="text-xs text-orange-400">Default: {JSON.stringify(propertyData.defaultValue)}</span>
-          </div>
-        )}
-
-        <div className="flex gap-2 mt-2">
-          <div className={`px-2 py-1 text-xs rounded ${
+    <SettingItem
+      category="Property"
+      name={propertyKey}
+      description={propertyData.description}
+      isModified={isModified}
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-xs text-txt/60">
+          <span className={`px-2 py-0.5 rounded ${
             propertyData.tag === 'sim'
-              ? 'bg-green-600 text-white'
-              : 'bg-yellow-600 text-white'
+              ? 'bg-green-600/20 text-green-400'
+              : 'bg-yellow-600/20 text-yellow-400'
           }`}>
             {propertyData.tag.toUpperCase()}
-          </div>
-          <div className="px-2 py-1 text-xs bg-background border border-bd rounded text-txt">
-            {propertyData.type}
-          </div>
+          </span>
+          <span>{propertyData.type}</span>
+          {propertyData.constraint.type !== 'None' && (
+            <span className="text-txt/40">
+              {propertyData.constraint.type === 'range'
+                ? `Range: ${propertyData.constraint.value.from} - ${propertyData.constraint.value.to}`
+                : `Options: ${propertyData.constraint.value.join(', ')}`
+              }
+            </span>
+          )}
         </div>
+        {renderInput()}
+        {isModified && (
+          <div className="text-xs text-txt/50">
+            Default: {JSON.stringify(propertyData.defaultValue)}
+          </div>
+        )}
       </div>
-    </div>
+    </SettingItem>
   );
 }

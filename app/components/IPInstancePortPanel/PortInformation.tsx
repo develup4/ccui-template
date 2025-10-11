@@ -1,9 +1,9 @@
 'use client';
 
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 
 export default function PortInformation() {
-    const { selectedPort } = useSelection();
+    const { selectedPort } = useExplorer();
 
     if (!selectedPort) {
         return null;

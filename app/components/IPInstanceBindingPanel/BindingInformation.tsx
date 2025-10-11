@@ -1,10 +1,10 @@
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 import { IPInstanceBinding } from '../../data-structure';
 
 export default function BindingInformation() {
-  const { selectedEdge } = useSelection();
+  const { selectedBinding } = useExplorer();
 
-  if (!selectedEdge) {
+  if (!selectedBinding) {
     return null;
   }
 
@@ -21,11 +21,11 @@ export default function BindingInformation() {
       <div className="space-y-1 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-txt/60 font-medium">From:</span>
-          <span className="text-txt font-mono">{selectedEdge.from}</span>
+          <span className="text-txt font-mono">{selectedBinding.from}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-txt/60 font-medium">To:</span>
-          <span className="text-txt font-mono">{selectedEdge.to}</span>
+          <span className="text-txt font-mono">{selectedBinding.to}</span>
         </div>
       </div>
     </div>

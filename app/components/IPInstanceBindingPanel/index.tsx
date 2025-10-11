@@ -1,32 +1,32 @@
 
 'use client';
 
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 import EmptyState from './EmptyState';
 import BindingInformation from './BindingInformation';
 import MappingSection from './MappingSection';
 import CrossingSection from './CrossingSection';
 
-export default function SelectEdgePanel() {
-  const { selectedEdge } = useSelection();
+export default function IPInstanceBindingPanel() {
+  const { selectedBinding } = useExplorer();
 
-  if (!selectedEdge) {
+  if (!selectedBinding) {
     return <EmptyState />;
   }
 
-  const properties = selectedEdge.properties || {};
+  const properties = selectedBinding.properties || {};
 
   return (
     <div className="w-full h-full p-3 bg-background overflow-y-auto">
       <div className="space-y-3">
-        <BindingInformation selectedBinding={selectedEdge} />
+        <BindingInformation selectedBinding={selectedBinding} />
         <MappingSection
           properties={properties}
-          selectedBinding={selectedEdge}
+          selectedBinding={selectedBinding}
         />
         <CrossingSection
           properties={properties}
-          selectedBinding={selectedEdge}
+          selectedBinding={selectedBinding}
         />
       </div>
     </div>

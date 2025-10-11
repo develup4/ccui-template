@@ -1,6 +1,6 @@
 'use client';
 
-import { useSelection } from '../../contexts/SelectionContext';
+import { useExplorer } from '../../contexts/ExplorerContext';
 import PropertyInput from '../PropertyInput';
 
 interface PropertyListProps {
@@ -16,7 +16,7 @@ export default function PropertyList({
     handlePropertyChange,
     handleRangedPropertyChange,
 }: PropertyListProps) {
-    const { selectedNode } = useSelection();
+    const { selectedNode } = useExplorer();
 
     if (!selectedNode) {
         return null;
@@ -40,7 +40,7 @@ export default function PropertyList({
     }
 
     return (
-        <div className="space-y-2">
+        <div>
             {filteredProperties.map(([propertyKey, propertyData]: [string, any]) => {
                 const currentValue = instanceProperties[propertyKey];
                 const isModified = currentValue !== undefined && currentValue !== propertyData.defaultValue;
