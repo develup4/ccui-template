@@ -15,9 +15,12 @@ import {
   Position,
   Handle,
   NodeProps,
+  EdgeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { IPInstance } from '../sample-data';
+import { useExplorer } from '../contexts/ExplorerContext';
+import { IPInstanceBinding } from '../data-structure';
 
 interface IPInstanceFlowPanelProps {
   rootInstance: IPInstance;
@@ -239,6 +242,7 @@ function createEdgesFromBindings(rootInstance: IPInstance): Edge[] {
 }
 
 export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPanelProps) {
+  const { setSelectedBinding } = useExplorer();
   const [portVisibility, setPortVisibility] = useState<Record<string, boolean>>({});
 
   const togglePorts = useCallback((nodeId: string) => {
@@ -267,6 +271,22 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
+
+  const onEdgeClick: EdgeMouseHandler = useCallback((event, edge) => {
+    // Create binding object from edge data
+    const binding: IPInstanceBinding = {
+      from: `${edge.source}.${edge.sourceHandle || ''}`,
+      to: `${edge.target}.${edge.targetHandle || ''}`,
+      properties: {}
+    };
+
+    setSelectedBinding(binding);
+
+    // Switch to edge tab
+    if (typeof window !== 'undefined' && (window as any).selectBinding) {
+      (window as any).selectBinding(binding);
+    }
+  }, [setSelectedBinding]);
 
   // Update nodes when port visibility changes
   const updatedNodes = nodes.map(node => ({
@@ -302,6 +322,7 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           fitView
           style={{ background: '#2a1065' }}
