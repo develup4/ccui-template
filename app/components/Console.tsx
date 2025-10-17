@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import Terminal from 'react-console-emulator';
+import { commandHistory } from '../lib/console/commandHistory';
 import { executeCommand } from '../lib/console/commandExecutor';
 
 interface ConsoleProps {
@@ -11,52 +12,70 @@ interface ConsoleProps {
 
 export default function Console({ isOpen, onToggle }: ConsoleProps) {
   const terminalRef = useRef<any>(null);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
-
-  // Generic command handler that routes all commands through executeCommand
-  const createCommandHandler = (cmdName: string) => {
-    return {
-      description: getCommandDescription(cmdName),
-      usage: getCommandUsage(cmdName),
-      fn: (...args: string[]) => {
-        const cmdStr = args.length > 0 ? `${cmdName} ${args.join(' ')}` : cmdName;
-        setCommandHistory(prev => [...prev, cmdStr]);
-
-        // Handle clear command specially to actually clear the terminal
-        if (cmdName === 'clear' && terminalRef.current) {
-          terminalRef.current.clearStdout();
-          return '';
-        }
-
-        const result = executeCommand(cmdStr);
-        return result.output;
-      }
-    };
-  };
 
   const commands = {
-    help: createCommandHandler('help'),
-    clear: createCommandHandler('clear'),
-    bind: createCommandHandler('bind'),
+    bind: {
+      description: 'Create port binding',
+      usage: 'bind {node}->{port}=>{node}->{port}',
+      fn: (...args: string[]) => {
+        const result = executeCommand(`bind ${args.join(' ')}`);
+        return result.output;
+      }
+    },
+    help: {
+      description: 'Show available commands',
+      usage: 'help',
+      fn: () => {
+        const result = executeCommand('help');
+        return result.output;
+      }
+    },
+    clear: {
+      description: 'Clear console output',
+      usage: 'clear',
+      fn: () => {
+        if (terminalRef.current) {
+          terminalRef.current.clearStdout();
+        }
+        return '';
+      }
+    },
+    undo: {
+      description: 'Undo last command',
+      usage: 'undo',
+      fn: () => {
+        return commandHistory.undo();
+      }
+    },
+    redo: {
+      description: 'Redo last undone command',
+      usage: 'redo',
+      fn: () => {
+        return commandHistory.redo();
+      }
+    },
+    history: {
+      description: 'Show command history',
+      usage: 'history',
+      fn: () => {
+        const undoHistory = commandHistory.getUndoHistory();
+        const redoHistory = commandHistory.getRedoHistory();
+
+        let output = 'Command History:\n';
+        if (undoHistory.length > 0) {
+          output += '\nUndo Stack:\n' + undoHistory.map((cmd, i) => `  ${i + 1}. ${cmd}`).join('\n');
+        }
+        if (redoHistory.length > 0) {
+          output += '\n\nRedo Stack:\n' + redoHistory.map((cmd, i) => `  ${i + 1}. ${cmd}`).join('\n');
+        }
+        if (undoHistory.length === 0 && redoHistory.length === 0) {
+          output += '\n  (empty)';
+        }
+
+        return output;
+      }
+    }
   };
-
-  function getCommandDescription(cmdName: string): string {
-    switch (cmdName) {
-      case 'help': return 'Show available commands';
-      case 'clear': return 'Clear console output';
-      case 'bind': return 'Create port binding';
-      default: return '';
-    }
-  }
-
-  function getCommandUsage(cmdName: string): string {
-    switch (cmdName) {
-      case 'help': return 'help';
-      case 'clear': return 'clear';
-      case 'bind': return 'bind {node}->{port}=>{node}->{port}';
-      default: return cmdName;
-    }
-  }
 
   const welcomeMessage = [
     '╔══════════════════════════════════════════════════╗',
@@ -66,6 +85,8 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
     'Type "help" for available commands',
     ''
   ];
+
+  const historyCount = commandHistory.getUndoHistory().length;
 
   return (
     <div className={`bg-gray-900 border-t border-green-500/30 flex flex-col shadow-2xl shadow-green-500/10 transition-all duration-300 ${
@@ -82,9 +103,9 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
         <div className="flex items-center gap-3">
           <span className={`text-green-400 font-bold text-lg ${isOpen ? 'animate-pulse' : ''}`}>❯</span>
           <span className="font-medium tracking-wide">{isOpen ? 'CONSOLE' : 'Console'}</span>
-          {commandHistory.length > 0 && (
+          {historyCount > 0 && (
             <span className="px-2 py-0.5 text-xs text-green-400 bg-green-400/10 rounded-md border border-green-500/20">
-              {commandHistory.length}
+              {historyCount}
             </span>
           )}
         </div>

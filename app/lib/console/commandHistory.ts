@@ -108,6 +108,77 @@ export const commandHistory = new CommandHistoryManager();
 // Binding Commands
 // ============================================================================
 
+// ============================================================================
+// Binding Parsing Types
+// ============================================================================
+
+export type BindingParsed = {
+  fromNode?: string;  // undefined if connecting from parent
+  fromPort: string;
+  toNode?: string;    // undefined if connecting to parent
+  toPort: string;
+};
+
+/**
+ * Parse bind command format
+ * Format: bind {node}->{port}=>{node}->{port}
+ * Shorthand: bind {port}=>{node}->{port} (from parent)
+ * Shorthand: bind {node}->{port}=>{port} (to parent)
+ * Multiple: bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
+ */
+export function parseBindCommand(bindStr: string): BindingParsed | null {
+  const cleaned = bindStr.trim();
+  const parts = cleaned.split('=>');
+  if (parts.length !== 2) {
+    return null;
+  }
+
+  const [leftSide, rightSide] = parts;
+
+  // Parse left side (from)
+  let fromNode: string | undefined;
+  let fromPort: string;
+
+  if (leftSide.includes('->')) {
+    const leftParts = leftSide.split('->');
+    fromNode = leftParts[0].trim();
+    fromPort = leftParts[1].trim();
+  } else {
+    fromPort = leftSide.trim();
+  }
+
+  // Parse right side (to)
+  let toNode: string | undefined;
+  let toPort: string;
+
+  if (rightSide.includes('->')) {
+    const rightParts = rightSide.split('->');
+    toNode = rightParts[0].trim();
+    toPort = rightParts[1].trim();
+  } else {
+    toPort = rightSide.trim();
+  }
+
+  return { fromNode, fromPort, toNode, toPort };
+}
+
+/**
+ * Parse multiple bind commands separated by semicolon
+ */
+export function parseMultipleBindCommands(bindStr: string): BindingParsed[] {
+  const bindings = bindStr.split(';').map(s => s.trim()).filter(s => s.length > 0);
+  const results: BindingParsed[] = [];
+
+  for (const binding of bindings) {
+    const parsed = parseBindCommand(binding);
+    if (parsed) {
+      results.push(parsed);
+    }
+  }
+
+  return results;
+}
+
 /**
  * Command to create a binding between two ports
  */
@@ -116,17 +187,32 @@ export class CreateBindingCommand extends UICommand {
   private instance: IPInstance;
   private binding: any;
   private bindingIndex: number = -1;
+  private parsed: BindingParsed;
 
   constructor(
     instance: IPInstance,
-    binding: any,
-    fromStr: string,
-    toStr: string
+    bindStr: string
   ) {
     super();
     this.instance = instance;
-    this.binding = binding;
-    this.description = `bind ${fromStr}=>${toStr}`;
+
+    // Parse the binding string
+    const parsed = parseBindCommand(bindStr);
+    if (!parsed) {
+      throw new Error(`Invalid bind format: ${bindStr}`);
+    }
+    this.parsed = parsed;
+
+    // Create binding object
+    const from = parsed.fromNode
+      ? `${parsed.fromNode}->${parsed.fromPort}`
+      : parsed.fromPort;
+    const to = parsed.toNode
+      ? `${parsed.toNode}->${parsed.toPort}`
+      : parsed.toPort;
+
+    this.binding = { from, to };
+    this.description = `bind ${from}=>${to}`;
   }
 
   execute(): void {
@@ -143,6 +229,16 @@ export class CreateBindingCommand extends UICommand {
       this.instance.bindings.splice(this.bindingIndex, 1);
       this.triggerUpdate();
     }
+  }
+
+  getBindingInfo(): string {
+    const from = this.parsed.fromNode
+      ? `${this.parsed.fromNode}->${this.parsed.fromPort}`
+      : this.parsed.fromPort;
+    const to = this.parsed.toNode
+      ? `${this.parsed.toNode}->${this.parsed.toPort}`
+      : this.parsed.toPort;
+    return `Parsed: ${from} => ${to}`;
   }
 }
 
