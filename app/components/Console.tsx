@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Terminal from 'react-console-emulator';
-import { executeCommand, CommandContext, logGuiAction } from '../lib/console/commandExecutor';
-import { executeAdvancedScript } from '../lib/console/scriptExecutor';
+import { executeCommand, CommandContext } from '../lib/console/commandExecutor';
 import { useExplorer } from '../contexts/ExplorerContext';
 import { sampleIPInstanceHierarchy } from '../sample-data';
 
@@ -65,59 +64,11 @@ export default function Console({
   };
 
   const commands = {
-    get_instances: {
-      description: 'Get list of instances',
-      usage: 'get_instances [-hierarchical <pattern>] [-filter {expr}]',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`get_instances ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    get_instance: {
-      description: 'Get specific instance',
-      usage: 'get_instance <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`get_instance ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    current_instance: {
-      description: 'Get or set current instance',
-      usage: 'current_instance [<hierarchy>]',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`current_instance ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    get_property: {
-      description: 'Get property value',
-      usage: 'get_property <name> <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`get_property ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    set_property: {
-      description: 'Set property value',
-      usage: 'set_property <name> <value> <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`set_property ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    list_property: {
-      description: 'List all properties',
-      usage: 'list_property <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`list_property ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    create_binding: {
+    bind: {
       description: 'Create binding between ports',
-      usage: 'create_binding -from <source> -to <target>',
+      usage: 'bind {node}->{port}=>{node}->{port}',
       fn: (...args: string[]) => {
-        const result = executeCommand(`create_binding ${args.join(' ')}`, commandContext);
+        const result = executeCommand(`bind ${args.join(' ')}`, commandContext);
         return result.output;
       }
     },
@@ -127,87 +78,6 @@ export default function Console({
       fn: (...args: string[]) => {
         const result = executeCommand(`get_bindings ${args.join(' ')}`, commandContext);
         return result.output;
-      }
-    },
-    select_objects: {
-      description: 'Select object in GUI',
-      usage: 'select_objects <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`select_objects ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    zoom_to: {
-      description: 'Zoom to object in viewport',
-      usage: 'zoom_to <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`zoom_to ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    show_ports: {
-      description: 'Show ports for instance',
-      usage: 'show_ports <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`show_ports ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    hide_ports: {
-      description: 'Hide ports for instance',
-      usage: 'hide_ports <hierarchy>',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`hide_ports ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    export_history: {
-      description: 'Export command history to file',
-      usage: 'export_history',
-      fn: () => {
-        const script = commandHistory.join('\n');
-        const blob = new Blob([script], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'console_history.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-        return 'Command history exported to console_history.txt';
-      }
-    },
-    clear_history: {
-      description: 'Clear command history',
-      usage: 'clear_history',
-      fn: () => {
-        setCommandHistory([]);
-        return 'Command history cleared';
-      }
-    },
-    run_script: {
-      description: 'Run multi-line script with loops',
-      usage: 'run_script <script_text>',
-      fn: (...args: string[]) => {
-        const scriptText = args.join(' ');
-        const result = executeAdvancedScript(scriptText, commandContext);
-
-        if (result.success) {
-          return result.output.join('\n');
-        } else {
-          return `Errors:\n${result.errors.join('\n')}\n\nOutput:\n${result.output.join('\n')}`;
-        }
-      }
-    },
-    source: {
-      description: 'Load and execute script from file (paste content)',
-      usage: 'source',
-      fn: () => {
-        return 'Paste your script below. Supported syntax:\n' +
-               '  for <var> in <list> { commands }\n' +
-               '  for <var> from <start> to <end> { commands }\n' +
-               '  foreach <var> [command] { commands }\n' +
-               'Example:\n' +
-               '  foreach inst [get_instances root.*] { show_ports $inst }';
       }
     }
   };
