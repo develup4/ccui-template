@@ -31,3 +31,18 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Fix react-console-emulator prompt and input alignment */
+.react-console-emulator__prompt,
+.react-console-emulator__content input {
+  vertical-align: baseline !important;
+  line-height: 1.6 !important;
+}
+
+.react-console-emulator__prompt {
+  display: inline-block !important;
+}
+
+.react-console-emulator__content input {
+  display: inline !important;
+}
