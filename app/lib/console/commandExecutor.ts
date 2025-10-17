@@ -1,67 +1,7 @@
-import { IPInstance } from '@/app/sample-data';
-import { IPInstanceBinding, IPInstancePort } from '@/app/data-structure';
-import { commandHistory, CreateBindingCommand } from './commandHistory';
-
-export type CommandContext = {
-  rootInstance: IPInstance;
-  currentInstance: IPInstance | null;
-  currentPort: IPInstancePort | null;
-  currentBinding: IPInstanceBinding | null;
-  setSelectedNode: (node: IPInstance | null) => void;
-  setSelectedPort: (port: IPInstancePort | null) => void;
-  setSelectedBinding: (binding: IPInstanceBinding | null) => void;
-  reactFlowInstance?: any;
-  portVisibility?: Record<string, boolean>;
-  setPortVisibility?: (visibility: Record<string, boolean>) => void;
-};
-
 export type CommandResult = {
   success: boolean;
   output: string;
-  data?: any;
 };
-
-// Helper: Find instance by hierarchy pattern
-export function findInstance(root: IPInstance, hierarchy: string): IPInstance | null {
-  if (root.hierarchy === hierarchy) return root;
-  for (const child of root.children) {
-    const found = findInstance(child, hierarchy);
-    if (found) return found;
-  }
-  return null;
-}
-
-// Helper: Get all instances recursively with optional pattern matching
-export function getAllInstances(instance: IPInstance, pattern?: string): IPInstance[] {
-  let instances = [instance];
-  instance.children.forEach(child => {
-    instances.push(...getAllInstances(child));
-  });
-
-  if (pattern) {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
-    instances = instances.filter(inst => regex.test(inst.hierarchy));
-  }
-
-  return instances;
-}
-
-// Helper: Get all bindings from instance tree
-export function getAllBindings(instance: IPInstance): Array<{instance: IPInstance, binding: any, index: number}> {
-  const result: Array<{instance: IPInstance, binding: any, index: number}> = [];
-
-  if (instance.bindings && Array.isArray(instance.bindings)) {
-    instance.bindings.forEach((binding, index) => {
-      result.push({ instance, binding, index });
-    });
-  }
-
-  instance.children.forEach(child => {
-    result.push(...getAllBindings(child));
-  });
-
-  return result;
-}
 
 // Helper: Parse command arguments (handles flags like -filter, -hierarchical, etc)
 export function parseArgs(argsStr: string): { args: string[], flags: Record<string, string> } {
@@ -166,146 +106,10 @@ export function parseMultipleBindCommands(bindStr: string): BindingParsed[] {
 }
 
 // Command Registry
-const commands: Record<string, (args: string[], flags: Record<string, string>, ctx: CommandContext) => CommandResult> = {
-
-  // === Binding Commands ===
-  bind: (args, flags, ctx) => {
-    if (args.length === 0) {
-      return { success: false, output: 'Error: Usage: bind {node}->{port}=>{node}->{port}' };
-    }
-
-    const bindStr = args.join(' ');
-    const parsedBindings = parseMultipleBindCommands(bindStr);
-
-    if (parsedBindings.length === 0) {
-      return { success: false, output: 'Error: Invalid bind format. Use: {node}->{port}=>{node}->{port}' };
-    }
-
-    const results: string[] = [];
-    let successCount = 0;
-
-    for (const parsed of parsedBindings) {
-      // Determine actual node hierarchies
-      const fromHierarchy = parsed.fromNode || ctx.currentInstance?.hierarchy;
-      const toHierarchy = parsed.toNode || ctx.currentInstance?.hierarchy;
-
-      if (!fromHierarchy || !toHierarchy) {
-        results.push(`Error: Cannot resolve node for ${parsed.fromPort}=>${parsed.toPort}`);
-        continue;
-      }
-
-      const fromInstance = findInstance(ctx.rootInstance, fromHierarchy);
-      const toInstance = findInstance(ctx.rootInstance, toHierarchy);
-
-      if (!fromInstance) {
-        results.push(`Error: Source instance not found: ${fromHierarchy}`);
-        continue;
-      }
-      if (!toInstance) {
-        results.push(`Error: Target instance not found: ${toHierarchy}`);
-        continue;
-      }
-
-      // Create binding object
-      const binding = {
-        from: parsed.fromPort,
-        to: `${toInstance.name}->${parsed.toPort}`,
-        properties: {}
-      };
-
-      // Create and execute command
-      const fromStr = parsed.fromNode ? `${parsed.fromNode}->` : '';
-      const toStr = parsed.toNode ? `${parsed.toNode}->` : '';
-      const cmd = new CreateBindingCommand(
-        fromInstance,
-        binding,
-        `${fromStr}${parsed.fromPort}`,
-        `${toStr}${parsed.toPort}`
-      );
-
-      // Set UI update callback
-      cmd.setUpdateCallback(() => {
-        ctx.setSelectedNode(fromInstance);
-      });
-
-      commandHistory.executeCommand(cmd);
-
-      results.push(`✓ ${fromHierarchy}.${parsed.fromPort} => ${toHierarchy}.${parsed.toPort}`);
-      successCount++;
-    }
-
-    const output = `Created ${successCount}/${parsedBindings.length} binding(s):\n${results.join('\n')}`;
-    return { success: successCount > 0, output };
-  },
-
-  get_bindings: (args, flags, ctx) => {
-    let bindings = getAllBindings(ctx.rootInstance);
-
-    if (flags.of_objects) {
-      const instance = findInstance(ctx.rootInstance, flags.of_objects);
-      if (instance) {
-        bindings = getAllBindings(instance);
-      }
-    }
-
-    if (flags.from) {
-      bindings = bindings.filter(b => {
-        const fullFrom = `${b.instance.hierarchy}.${b.binding.from}`;
-        return fullFrom.includes(flags.from);
-      });
-    }
-
-    const output = bindings.map(b =>
-      `${b.instance.hierarchy}.${b.binding.from} -> ${b.binding.to}`
-    ).join('\n');
-
-    return { success: true, output: output || '(no bindings)', data: bindings };
-  },
-
-  // === Undo/Redo Commands ===
-  undo: (args, flags, ctx) => {
-    const result = commandHistory.undo();
-    ctx.setSelectedNode(ctx.currentInstance); // Trigger UI refresh
-    return { success: true, output: result };
-  },
-
-  redo: (args, flags, ctx) => {
-    const result = commandHistory.redo();
-    ctx.setSelectedNode(ctx.currentInstance); // Trigger UI refresh
-    return { success: true, output: result };
-  },
-
-  history: (args, flags, ctx) => {
-    const undoHistory = commandHistory.getUndoHistory();
-    const redoHistory = commandHistory.getRedoHistory();
-
-    let output = 'Command History:\n\n';
-
-    if (undoHistory.length > 0) {
-      output += 'Undo Stack:\n';
-      undoHistory.forEach((cmd, idx) => {
-        output += `  ${idx + 1}. ${cmd}\n`;
-      });
-    } else {
-      output += 'Undo Stack: (empty)\n';
-    }
-
-    output += '\n';
-
-    if (redoHistory.length > 0) {
-      output += 'Redo Stack:\n';
-      redoHistory.forEach((cmd, idx) => {
-        output += `  ${idx + 1}. ${cmd}\n`;
-      });
-    } else {
-      output += 'Redo Stack: (empty)';
-    }
-
-    return { success: true, output };
-  },
+const commands: Record<string, (args: string[], flags: Record<string, string>) => CommandResult> = {
 
   // === Help Command ===
-  help: (args, flags, ctx) => {
+  help: (args, flags) => {
     const helpText = `
 Available Commands:
 
@@ -319,31 +123,52 @@ Binding Management:
     - Multiple bindings: Use semicolon (;) to separate
     - Spaces are optional around arrows and separators
 
-  get_bindings [-of_objects <hierarchy>] [-from <pattern>]
-
-History Management:
-  undo - Undo last command
-  redo - Redo last undone command
-  history - Show command history
+Console Management:
+  help - Show this help message
+  clear - Clear console output
 
 Examples:
   bind cpu->out=>mem->in
   bind out=>child1->in
   bind child2->out=>in
   bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
-  undo
-  redo
-  history
-  get_bindings
-  get_bindings -of_objects root.cpu
-  get_bindings -from root.cpu
+  help
+  clear
     `.trim();
 
     return { success: true, output: helpText };
   },
+
+  // === Clear Command ===
+  clear: (args, flags) => {
+    return { success: true, output: '' };
+  },
+
+  // === Bind Command ===
+  bind: (args, flags) => {
+    if (args.length === 0) {
+      return { success: false, output: 'Error: Usage: bind {node}->{port}=>{node}->{port}' };
+    }
+
+    const bindStr = args.join(' ');
+    const parsedBindings = parseMultipleBindCommands(bindStr);
+
+    if (parsedBindings.length === 0) {
+      return { success: false, output: 'Error: Invalid bind format. Use: {node}->{port}=>{node}->{port}' };
+    }
+
+    // Only validate parsing, don't execute
+    const results = parsedBindings.map(p => {
+      const from = p.fromNode ? `${p.fromNode}->${p.fromPort}` : p.fromPort;
+      const to = p.toNode ? `${p.toNode}->${p.toPort}` : p.toPort;
+      return `Parsed: ${from} => ${to}`;
+    });
+
+    return { success: true, output: results.join('\n') };
+  },
 };
 
-export function executeCommand(commandStr: string, ctx: CommandContext): CommandResult {
+export function executeCommand(commandStr: string): CommandResult {
   const trimmed = commandStr.trim();
   if (!trimmed) {
     return { success: false, output: '' };
@@ -362,15 +187,8 @@ export function executeCommand(commandStr: string, ctx: CommandContext): Command
   }
 
   try {
-    return command(args, flags, ctx);
+    return command(args, flags);
   } catch (error) {
     return { success: false, output: `Error: ${(error as Error).message}` };
-  }
-}
-
-// Export command to log GUI actions
-export function logGuiAction(action: string): void {
-  if (typeof window !== 'undefined' && (window as any).logConsoleCommand) {
-    (window as any).logConsoleCommand(action);
   }
 }

@@ -1,113 +1,46 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Terminal from 'react-console-emulator';
-import { executeCommand, CommandContext } from '../lib/console/commandExecutor';
-import { useExplorer } from '../contexts/ExplorerContext';
-import { sampleIPInstanceHierarchy } from '../sample-data';
+import { executeCommand } from '../lib/console/commandExecutor';
 
 interface ConsoleProps {
   isOpen: boolean;
   onToggle: () => void;
-  reactFlowInstance?: any;
-  portVisibility?: Record<string, boolean>;
-  setPortVisibility?: (visibility: Record<string, boolean>) => void;
 }
 
-export default function Console({
-  isOpen,
-  onToggle,
-  reactFlowInstance,
-  portVisibility,
-  setPortVisibility
-}: ConsoleProps) {
+export default function Console({ isOpen, onToggle }: ConsoleProps) {
   const terminalRef = useRef<any>(null);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const {
-    selectedNode,
-    setSelectedNode,
-    selectedPort,
-    setSelectedPort,
-    selectedBinding,
-    setSelectedBinding
-  } = useExplorer();
-
-  // Setup global logging function for GUI actions
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).logConsoleCommand = (command: string) => {
-        setCommandHistory(prev => [...prev, command]);
-        if (terminalRef.current) {
-          terminalRef.current.pushToStdout(`# GUI: ${command}`);
-        }
-      };
-    }
-
-    return () => {
-      if (typeof window !== 'undefined') {
-        delete (window as any).logConsoleCommand;
-      }
-    };
-  }, []);
-
-  const commandContext: CommandContext = {
-    rootInstance: sampleIPInstanceHierarchy,
-    currentInstance: selectedNode,
-    currentPort: selectedPort,
-    currentBinding: selectedBinding,
-    setSelectedNode,
-    setSelectedPort,
-    setSelectedBinding,
-    reactFlowInstance,
-    portVisibility,
-    setPortVisibility
-  };
 
   const commands = {
     bind: {
-      description: 'Create binding between ports',
+      description: 'Parse binding syntax',
       usage: 'bind {node}->{port}=>{node}->{port}',
       fn: (...args: string[]) => {
-        const result = executeCommand(`bind ${args.join(' ')}`, commandContext);
+        const cmdStr = `bind ${args.join(' ')}`;
+        setCommandHistory(prev => [...prev, cmdStr]);
+        const result = executeCommand(cmdStr);
         return result.output;
       }
     },
-    get_bindings: {
-      description: 'Get list of bindings',
-      usage: 'get_bindings [-of_objects <hierarchy>] [-from <pattern>]',
-      fn: (...args: string[]) => {
-        const result = executeCommand(`get_bindings ${args.join(' ')}`, commandContext);
-        return result.output;
-      }
-    },
-    undo: {
-      description: 'Undo last command',
-      usage: 'undo',
-      fn: (...args: string[]) => {
-        const result = executeCommand('undo', commandContext);
-        return result.output;
-      }
-    },
-    redo: {
-      description: 'Redo last undone command',
-      usage: 'redo',
-      fn: (...args: string[]) => {
-        const result = executeCommand('redo', commandContext);
-        return result.output;
-      }
-    },
-    history: {
-      description: 'Show command history',
-      usage: 'history',
-      fn: (...args: string[]) => {
-        const result = executeCommand('history', commandContext);
-        return result.output;
+    clear: {
+      description: 'Clear console output',
+      usage: 'clear',
+      fn: () => {
+        if (terminalRef.current) {
+          terminalRef.current.clearStdout();
+        }
+        return '';
       }
     }
   };
 
   const welcomeMessage = [
-    'IP Instance Explorer Console v1.0',
+    '╔══════════════════════════════════════════════════╗',
+    '║   IP Instance Explorer Console v1.0              ║',
+    '╚══════════════════════════════════════════════════╝',
+    '',
     'Type "help" for available commands',
     ''
   ];
@@ -116,14 +49,14 @@ export default function Console({
     return (
       <button
         onClick={onToggle}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-700 px-4 py-2 text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-colors flex items-center gap-2"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-gray-900 via-gray-900 to-gray-800 border-t border-green-500/30 px-6 py-3 text-sm text-gray-300 hover:text-green-400 hover:border-green-400/50 transition-all duration-200 flex items-center gap-3 shadow-lg shadow-green-500/5"
         title="Open Console (Ctrl+`)"
       >
-        <span className="text-green-400">❯</span>
-        <span>Console</span>
+        <span className="text-green-400 font-bold text-lg">❯</span>
+        <span className="font-medium tracking-wide">Console</span>
         {commandHistory.length > 0 && (
-          <span className="ml-auto text-xs text-gray-500">
-            {commandHistory.length} commands in history
+          <span className="ml-auto px-2 py-0.5 text-xs text-green-400 bg-green-400/10 rounded-md border border-green-500/20">
+            {commandHistory.length} {commandHistory.length === 1 ? 'command' : 'commands'}
           </span>
         )}
       </button>
@@ -131,41 +64,36 @@ export default function Console({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-700 flex flex-col" style={{ height: '350px' }}>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-green-500/30 flex flex-col shadow-2xl shadow-green-500/10" style={{ height: '400px' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <div className="flex items-center gap-2 text-sm text-gray-300">
-          <span className="text-green-400">❯</span>
-          <span className="font-semibold">Console</span>
+      <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-gray-800 via-gray-800 to-gray-900 border-b border-green-500/20">
+        <div className="flex items-center gap-3 text-sm">
+          <span className="text-green-400 font-bold text-lg animate-pulse">❯</span>
+          <span className="font-semibold text-green-400 tracking-wider">CONSOLE</span>
           {commandHistory.length > 0 && (
-            <span className="text-xs text-gray-500">
-              ({commandHistory.length} commands)
+            <span className="px-2 py-0.5 text-xs text-green-400 bg-green-400/10 rounded-md border border-green-500/20">
+              {commandHistory.length}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              const script = commandHistory.join('\n');
-              const blob = new Blob([script], { type: 'text/plain' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'console_history.txt';
-              a.click();
-              URL.revokeObjectURL(url);
+              if (terminalRef.current) {
+                terminalRef.current.clearStdout();
+              }
             }}
-            className="text-xs px-2 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition-colors"
-            title="Export history"
+            className="text-xs px-3 py-1.5 text-gray-400 hover:text-green-400 hover:bg-green-400/10 rounded-md border border-gray-700 hover:border-green-500/30 transition-all duration-200"
+            title="Clear console"
           >
-            Export
+            Clear
           </button>
           <button
             onClick={onToggle}
-            className="text-gray-400 hover:text-gray-200 transition-colors"
+            className="text-gray-400 hover:text-green-400 transition-colors p-1 hover:bg-green-400/10 rounded"
             title="Close Console (Esc)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -180,24 +108,29 @@ export default function Console({
           welcomeMessage={welcomeMessage}
           promptLabel="❯"
           style={{
-            backgroundColor: '#111827',
+            backgroundColor: '#0f172a',
             minHeight: '100%',
             maxHeight: '100%',
             overflow: 'auto',
-            fontFamily: 'monospace',
-            fontSize: '14px'
+            fontFamily: '"Fira Code", "Courier New", monospace',
+            fontSize: '14px',
+            lineHeight: '1.6',
+            padding: '16px'
           }}
           messageStyle={{
-            color: '#d1d5db'
+            color: '#cbd5e1'
           }}
           promptLabelStyle={{
-            color: '#10b981'
+            color: '#10b981',
+            fontWeight: 'bold'
           }}
           inputTextStyle={{
-            color: '#f3f4f6'
+            color: '#f1f5f9',
+            fontWeight: '500'
           }}
           errorStyle={{
-            color: '#ef4444'
+            color: '#f87171',
+            fontWeight: '500'
           }}
         />
       </div>
