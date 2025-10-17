@@ -93,6 +93,7 @@ export function parseArgs(argsStr: string): { args: string[], flags: Record<stri
 // Format: bind {node}->{port}=>{node}->{port}
 // Shorthand: bind {port}=>{node}->{port} (from parent)
 // Shorthand: bind {node}->{port}=>{port} (to parent)
+// Multiple: bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
 export type BindingParsed = {
   fromNode?: string;  // undefined if connecting from parent
   fromPort: string;
@@ -118,11 +119,11 @@ export function parseBindCommand(bindStr: string): BindingParsed | null {
 
   if (leftSide.includes('->')) {
     const leftParts = leftSide.split('->');
-    fromNode = leftParts[0];
-    fromPort = leftParts[1];
+    fromNode = leftParts[0].trim();
+    fromPort = leftParts[1].trim();
   } else {
     // No node specified, means from parent
-    fromPort = leftSide;
+    fromPort = leftSide.trim();
   }
 
   // Parse right side (to)
@@ -131,11 +132,11 @@ export function parseBindCommand(bindStr: string): BindingParsed | null {
 
   if (rightSide.includes('->')) {
     const rightParts = rightSide.split('->');
-    toNode = rightParts[0];
-    toPort = rightParts[1];
+    toNode = rightParts[0].trim();
+    toPort = rightParts[1].trim();
   } else {
     // No node specified, means to parent
-    toPort = rightSide;
+    toPort = rightSide.trim();
   }
 
   return {
@@ -144,6 +145,23 @@ export function parseBindCommand(bindStr: string): BindingParsed | null {
     toNode,
     toPort
   };
+}
+
+// Helper: Parse multiple bind commands separated by semicolon
+export function parseMultipleBindCommands(bindStr: string): BindingParsed[] {
+  // Split by semicolon
+  const bindings = bindStr.split(';').map(s => s.trim()).filter(s => s.length > 0);
+
+  const results: BindingParsed[] = [];
+
+  for (const binding of bindings) {
+    const parsed = parseBindCommand(binding);
+    if (parsed) {
+      results.push(parsed);
+    }
+  }
+
+  return results;
 }
 
 // Command Registry
@@ -156,21 +174,26 @@ const commands: Record<string, (args: string[], flags: Record<string, string>, c
     }
 
     const bindStr = args.join(' ');
-    const parsed = parseBindCommand(bindStr);
+    const parsedBindings = parseMultipleBindCommands(bindStr);
 
-    if (!parsed) {
+    if (parsedBindings.length === 0) {
       return { success: false, output: 'Error: Invalid bind format. Use: {node}->{port}=>{node}->{port}' };
     }
 
     // TODO: Implement actual binding logic
     // For now, just show what was parsed
-    const output = `Parsed binding:
-  From: ${parsed.fromNode ? `${parsed.fromNode}->` : '(parent)->'}${parsed.fromPort}
-  To: ${parsed.toNode ? `${parsed.toNode}->` : '(parent)->'}${parsed.toPort}
+    const outputLines = parsedBindings.map((parsed, index) => {
+      const fromStr = parsed.fromNode ? `${parsed.fromNode}->` : '(parent)->';
+      const toStr = parsed.toNode ? `${parsed.toNode}->` : '(parent)->';
+      return `  [${index + 1}] ${fromStr}${parsed.fromPort} => ${toStr}${parsed.toPort}`;
+    });
+
+    const output = `Parsed ${parsedBindings.length} binding(s):
+${outputLines.join('\n')}
 
 (Actual binding creation not yet implemented)`;
 
-    return { success: true, output, data: parsed };
+    return { success: true, output, data: parsedBindings };
   },
 
   get_bindings: (args, flags, ctx) => {
@@ -207,6 +230,7 @@ Binding Management:
     - Full format: bind cpu->out=>mem->in
     - From parent: bind out=>mem->in
     - To parent: bind cpu->out=>in
+    - Multiple: bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
 
   get_bindings [-of_objects <hierarchy>] [-from <pattern>]
 
@@ -214,6 +238,7 @@ Examples:
   bind cpu->out=>mem->in
   bind out=>child1->in
   bind child2->out=>in
+  bind "a->p1=>b->p1; b->p2=>p3"
   get_bindings
   get_bindings -of_objects root.cpu
   get_bindings -from root.cpu
