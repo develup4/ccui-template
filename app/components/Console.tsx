@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Terminal from 'react-console-emulator';
 import { executeCommand } from '../lib/console/commandExecutor';
 
@@ -12,6 +12,7 @@ interface ConsoleProps {
 export default function Console({ isOpen, onToggle }: ConsoleProps) {
   const terminalRef = useRef<any>(null);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const commands = {
     bind: {
@@ -26,14 +27,28 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
     }
   };
 
-  const welcomeMessage = [
-    '╔══════════════════════════════════════════════════╗',
-    '║   IP Instance Explorer Console v1.0              ║',
-    '╚══════════════════════════════════════════════════╝',
-    '',
-    'Type "help" for available commands',
-    ''
-  ];
+  // Show welcome message only once when console first opens
+  useEffect(() => {
+    if (isOpen && terminalRef.current && !isInitialized) {
+      const welcomeMessage = [
+        '╔══════════════════════════════════════════════════╗',
+        '║   IP Instance Explorer Console v1.0              ║',
+        '╚══════════════════════════════════════════════════╝',
+        '',
+        'Type "help" for available commands',
+        ''
+      ];
+
+      // Small delay to ensure terminal is ready
+      const timer = setTimeout(() => {
+        if (terminalRef.current) {
+          terminalRef.current.pushToStdout(welcomeMessage.join('\n'));
+        }
+        setIsInitialized(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isInitialized]);
 
   return (
     <div className={`bg-gray-900 border-t border-green-500/30 flex flex-col shadow-2xl shadow-green-500/10 transition-all duration-300 ${
@@ -89,7 +104,7 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
           <Terminal
             ref={terminalRef}
             commands={commands}
-            welcomeMessage={welcomeMessage}
+            welcomeMessage={[]}
             promptLabel="❯"
             style={{
               backgroundColor: '#0f172a',
