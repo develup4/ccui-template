@@ -79,6 +79,30 @@ export default function Console({
         const result = executeCommand(`get_bindings ${args.join(' ')}`, commandContext);
         return result.output;
       }
+    },
+    undo: {
+      description: 'Undo last command',
+      usage: 'undo',
+      fn: (...args: string[]) => {
+        const result = executeCommand('undo', commandContext);
+        return result.output;
+      }
+    },
+    redo: {
+      description: 'Redo last undone command',
+      usage: 'redo',
+      fn: (...args: string[]) => {
+        const result = executeCommand('redo', commandContext);
+        return result.output;
+      }
+    },
+    history: {
+      description: 'Show command history',
+      usage: 'history',
+      fn: (...args: string[]) => {
+        const result = executeCommand('history', commandContext);
+        return result.output;
+      }
     }
   };
 

@@ -1,5 +1,6 @@
 import { IPInstance } from '@/app/sample-data';
 import { IPInstanceBinding, IPInstancePort } from '@/app/data-structure';
+import { commandHistory, CreateBindingCommand } from './commandHistory';
 
 export type CommandContext = {
   rootInstance: IPInstance;
@@ -180,20 +181,61 @@ const commands: Record<string, (args: string[], flags: Record<string, string>, c
       return { success: false, output: 'Error: Invalid bind format. Use: {node}->{port}=>{node}->{port}' };
     }
 
-    // TODO: Implement actual binding logic
-    // For now, just show what was parsed
-    const outputLines = parsedBindings.map((parsed, index) => {
-      const fromStr = parsed.fromNode ? `${parsed.fromNode}->` : '(parent)->';
-      const toStr = parsed.toNode ? `${parsed.toNode}->` : '(parent)->';
-      return `  [${index + 1}] ${fromStr}${parsed.fromPort} => ${toStr}${parsed.toPort}`;
-    });
+    const results: string[] = [];
+    let successCount = 0;
 
-    const output = `Parsed ${parsedBindings.length} binding(s):
-${outputLines.join('\n')}
+    for (const parsed of parsedBindings) {
+      // Determine actual node hierarchies
+      const fromHierarchy = parsed.fromNode || ctx.currentInstance?.hierarchy;
+      const toHierarchy = parsed.toNode || ctx.currentInstance?.hierarchy;
 
-(Actual binding creation not yet implemented)`;
+      if (!fromHierarchy || !toHierarchy) {
+        results.push(`Error: Cannot resolve node for ${parsed.fromPort}=>${parsed.toPort}`);
+        continue;
+      }
 
-    return { success: true, output, data: parsedBindings };
+      const fromInstance = findInstance(ctx.rootInstance, fromHierarchy);
+      const toInstance = findInstance(ctx.rootInstance, toHierarchy);
+
+      if (!fromInstance) {
+        results.push(`Error: Source instance not found: ${fromHierarchy}`);
+        continue;
+      }
+      if (!toInstance) {
+        results.push(`Error: Target instance not found: ${toHierarchy}`);
+        continue;
+      }
+
+      // Create binding object
+      const binding = {
+        from: parsed.fromPort,
+        to: `${toInstance.name}->${parsed.toPort}`,
+        properties: {}
+      };
+
+      // Create and execute command
+      const fromStr = parsed.fromNode ? `${parsed.fromNode}->` : '';
+      const toStr = parsed.toNode ? `${parsed.toNode}->` : '';
+      const cmd = new CreateBindingCommand(
+        fromInstance,
+        binding,
+        `${fromStr}${parsed.fromPort}`,
+        `${toStr}${parsed.toPort}`
+      );
+
+      // Set UI update callback
+      cmd.setUpdateCallback(() => {
+        ctx.setSelectedNode(fromInstance);
+      });
+
+      commandHistory.executeCommand(cmd);
+
+      results.push(`✓ ${fromHierarchy}.${parsed.fromPort} => ${toHierarchy}.${parsed.toPort}`);
+      successCount++;
+    }
+
+    const output = `Created ${successCount}/${parsedBindings.length} binding(s):\n${results.join('\n')}`;
+    return { success: successCount > 0, output };
   },
 
   get_bindings: (args, flags, ctx) => {
@@ -220,6 +262,48 @@ ${outputLines.join('\n')}
     return { success: true, output: output || '(no bindings)', data: bindings };
   },
 
+  // === Undo/Redo Commands ===
+  undo: (args, flags, ctx) => {
+    const result = commandHistory.undo();
+    ctx.setSelectedNode(ctx.currentInstance); // Trigger UI refresh
+    return { success: true, output: result };
+  },
+
+  redo: (args, flags, ctx) => {
+    const result = commandHistory.redo();
+    ctx.setSelectedNode(ctx.currentInstance); // Trigger UI refresh
+    return { success: true, output: result };
+  },
+
+  history: (args, flags, ctx) => {
+    const undoHistory = commandHistory.getUndoHistory();
+    const redoHistory = commandHistory.getRedoHistory();
+
+    let output = 'Command History:\n\n';
+
+    if (undoHistory.length > 0) {
+      output += 'Undo Stack:\n';
+      undoHistory.forEach((cmd, idx) => {
+        output += `  ${idx + 1}. ${cmd}\n`;
+      });
+    } else {
+      output += 'Undo Stack: (empty)\n';
+    }
+
+    output += '\n';
+
+    if (redoHistory.length > 0) {
+      output += 'Redo Stack:\n';
+      redoHistory.forEach((cmd, idx) => {
+        output += `  ${idx + 1}. ${cmd}\n`;
+      });
+    } else {
+      output += 'Redo Stack: (empty)';
+    }
+
+    return { success: true, output };
+  },
+
   // === Help Command ===
   help: (args, flags, ctx) => {
     const helpText = `
@@ -237,11 +321,19 @@ Binding Management:
 
   get_bindings [-of_objects <hierarchy>] [-from <pattern>]
 
+History Management:
+  undo - Undo last command
+  redo - Redo last undone command
+  history - Show command history
+
 Examples:
   bind cpu->out=>mem->in
   bind out=>child1->in
   bind child2->out=>in
   bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
+  undo
+  redo
+  history
   get_bindings
   get_bindings -of_objects root.cpu
   get_bindings -from root.cpu
