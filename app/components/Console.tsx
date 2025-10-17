@@ -106,7 +106,10 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
             }}
             promptLabelStyle={{
               color: '#10b981',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              display: 'inline-block',
+              verticalAlign: 'middle',
+              lineHeight: '1.6'
             }}
             inputTextStyle={{
               color: '#f1f5f9',
