@@ -85,7 +85,7 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
 
       {/* Terminal */}
       {isOpen && (
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden [&_.react-console-emulator__prompt]:align-baseline [&_.react-console-emulator__prompt]:inline-block [&_.react-console-emulator__content_input]:align-baseline [&_.react-console-emulator__content_input]:inline">
           <Terminal
             ref={terminalRef}
             commands={commands}
