@@ -113,7 +113,9 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
             }}
             inputTextStyle={{
               color: '#f1f5f9',
-              fontWeight: '500'
+              fontWeight: '500',
+              verticalAlign: 'middle',
+              lineHeight: '1.6'
             }}
             errorStyle={{
               color: '#f87171',
