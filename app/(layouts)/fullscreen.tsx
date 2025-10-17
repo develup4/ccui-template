@@ -152,9 +152,9 @@ export default function FullscreenLayout({
         triggerUpdate
       }}
     >
-        <div className="w-full h-screen bg-background">
+        <div className="w-full h-screen bg-background flex flex-col">
             <div className="w-full min-h-[8rem] bg-overlay"></div>
-            <div className="size-full flex">
+            <div className="flex-1 flex overflow-hidden">
                 <div className="w-[28rem] bg-background border-r border-bd">
                     <IPInstanceTreeView
                         rootInstance={sampleIPInstanceHierarchy}
@@ -217,16 +217,13 @@ export default function FullscreenLayout({
                     </div>
                 </div>
             </div>
-        </div>
 
-        {/* Console */}
-        <Console
-          isOpen={consoleOpen}
-          onToggle={() => setConsoleOpen(!consoleOpen)}
-          reactFlowInstance={reactFlowInstance}
-          portVisibility={portVisibility}
-          setPortVisibility={setPortVisibility}
-        />
+            {/* Console */}
+            <Console
+              isOpen={consoleOpen}
+              onToggle={() => setConsoleOpen(!consoleOpen)}
+            />
+        </div>
     </ExplorerContext.Provider>
     );
 }
