@@ -21,6 +21,7 @@ import '@xyflow/react/dist/style.css';
 import { IPInstance } from '../sample-data';
 import { useExplorer } from '../contexts/ExplorerContext';
 import { IPInstanceBinding } from '../data-structure';
+import { logGuiAction } from '../lib/console/commandExecutor';
 
 interface IPInstanceFlowPanelProps {
   rootInstance: IPInstance;
@@ -246,11 +247,15 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
   const [portVisibility, setPortVisibility] = useState<Record<string, boolean>>({});
 
   const togglePorts = useCallback((nodeId: string) => {
+    const newVisibility = !portVisibility[nodeId];
     setPortVisibility(prev => ({
       ...prev,
-      [nodeId]: !prev[nodeId]
+      [nodeId]: newVisibility
     }));
-  }, []);
+
+    // Log GUI action to console
+    logGuiAction(newVisibility ? `show_ports ${nodeId}` : `hide_ports ${nodeId}`);
+  }, [portVisibility]);
 
   const initialNodes = createNodesFromInstances(rootInstance);
   const initialEdges = createEdgesFromBindings(rootInstance);
@@ -268,7 +273,14 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => {
+      setEdges((eds) => addEdge(params, eds));
+
+      // Log GUI action to console
+      const fromPort = `${params.source}.${params.sourceHandle || ''}`;
+      const toPort = `${params.target}.${params.targetHandle || ''}`;
+      logGuiAction(`create_binding -from ${fromPort} -to ${toPort}`);
+    },
     [setEdges],
   );
 
@@ -281,6 +293,9 @@ export default function IPInstanceFlowPanel({ rootInstance }: IPInstanceFlowPane
     };
 
     setSelectedBinding(binding);
+
+    // Log GUI action to console
+    logGuiAction(`select_objects ${edge.source}`);
 
     // Switch to edge tab
     if (typeof window !== 'undefined' && (window as any).selectBinding) {

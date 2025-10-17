@@ -5,9 +5,11 @@ import IPInstanceTreeView from '../components/IPInstanceTreeView';
 import IPInstancePropertyPanel from '../components/IPInstancePropertyPanel';
 import IPInstancePortPanel from '../components/IPInstancePortPanel';
 import IPInstanceBindingPanel from '../components/IPInstanceBindingPanel';
+import Console from '../components/Console';
 import { sampleIPInstanceHierarchy, IPInstance } from '../sample-data';
 import { IPInstancePort, IPInstanceBinding } from '../data-structure';
 import { ExplorerContext } from '../contexts/ExplorerContext';
+import { logGuiAction } from '../lib/console/commandExecutor';
 
 type SelectionType = 'instance' | 'port' | 'edge';
 
@@ -21,6 +23,9 @@ export default function FullscreenLayout({
   const [selectedPort, setSelectedPortState] = useState<IPInstancePort | null>(null);
   const [selectedBinding, setSelectedBindingState] = useState<IPInstanceBinding | null>(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
+  const [consoleOpen, setConsoleOpen] = useState(false);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  const [portVisibility, setPortVisibility] = useState<Record<string, boolean>>({});
 
   // Helper function to find instance by hierarchy
   const findInstanceByHierarchy = (instance: IPInstance, hierarchy: string): IPInstance | null => {
@@ -40,6 +45,11 @@ export default function FullscreenLayout({
     const instance = findInstanceByHierarchy(sampleIPInstanceHierarchy, hierarchy);
     setSelectedNodeState(instance);
     setSelectionType('instance');
+
+    // Log GUI action to console
+    if (instance) {
+      logGuiAction(`current_instance ${instance.hierarchy}`);
+    }
   };
 
   // Wrapper functions that trigger server action after state update
@@ -48,6 +58,8 @@ export default function FullscreenLayout({
     setUpdateTrigger(prev => prev + 1);
 
     if (node) {
+      // Log GUI action to console
+      logGuiAction(`current_instance ${node.hierarchy}`);
       // TODO: Call server action to update IPInstance
       // await updateIPInstance(node);
     }
@@ -112,6 +124,21 @@ export default function FullscreenLayout({
       // Initially empty, properties can be toggled on
     }
   };
+
+  // Handle keyboard shortcut for console (Ctrl+`)
+  useCallback(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === '`') {
+        e.preventDefault();
+        setConsoleOpen(prev => !prev);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   return (
     <ExplorerContext.Provider
@@ -191,6 +218,15 @@ export default function FullscreenLayout({
                 </div>
             </div>
         </div>
+
+        {/* Console */}
+        <Console
+          isOpen={consoleOpen}
+          onToggle={() => setConsoleOpen(!consoleOpen)}
+          reactFlowInstance={reactFlowInstance}
+          portVisibility={portVisibility}
+          setPortVisibility={setPortVisibility}
+        />
     </ExplorerContext.Provider>
     );
 }
