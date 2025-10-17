@@ -23,16 +23,6 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
         const result = executeCommand(cmdStr);
         return result.output;
       }
-    },
-    clear: {
-      description: 'Clear console output',
-      usage: 'clear',
-      fn: () => {
-        if (terminalRef.current) {
-          terminalRef.current.clearStdout();
-        }
-        return '';
-      }
     }
   };
 
