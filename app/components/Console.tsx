@@ -13,18 +13,50 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
   const terminalRef = useRef<any>(null);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
 
-  const commands = {
-    bind: {
-      description: 'Parse binding syntax',
-      usage: 'bind {node}->{port}=>{node}->{port}',
+  // Generic command handler that routes all commands through executeCommand
+  const createCommandHandler = (cmdName: string) => {
+    return {
+      description: getCommandDescription(cmdName),
+      usage: getCommandUsage(cmdName),
       fn: (...args: string[]) => {
-        const cmdStr = `bind ${args.join(' ')}`;
+        const cmdStr = args.length > 0 ? `${cmdName} ${args.join(' ')}` : cmdName;
         setCommandHistory(prev => [...prev, cmdStr]);
+
+        // Handle clear command specially to actually clear the terminal
+        if (cmdName === 'clear' && terminalRef.current) {
+          terminalRef.current.clearStdout();
+          return '';
+        }
+
         const result = executeCommand(cmdStr);
         return result.output;
       }
-    }
+    };
   };
+
+  const commands = {
+    help: createCommandHandler('help'),
+    clear: createCommandHandler('clear'),
+    bind: createCommandHandler('bind'),
+  };
+
+  function getCommandDescription(cmdName: string): string {
+    switch (cmdName) {
+      case 'help': return 'Show available commands';
+      case 'clear': return 'Clear console output';
+      case 'bind': return 'Create port binding';
+      default: return '';
+    }
+  }
+
+  function getCommandUsage(cmdName: string): string {
+    switch (cmdName) {
+      case 'help': return 'help';
+      case 'clear': return 'clear';
+      case 'bind': return 'bind {node}->{port}=>{node}->{port}';
+      default: return cmdName;
+    }
+  }
 
   const welcomeMessage = [
     '╔══════════════════════════════════════════════════╗',
@@ -57,20 +89,6 @@ export default function Console({ isOpen, onToggle }: ConsoleProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {isOpen && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (terminalRef.current) {
-                  terminalRef.current.clearStdout();
-                }
-              }}
-              className="text-xs px-3 py-1.5 text-gray-400 hover:text-green-400 hover:bg-green-400/10 rounded-md border border-gray-700 hover:border-green-500/30 transition-all duration-200"
-              title="Clear console"
-            >
-              Clear
-            </button>
-          )}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className={`h-5 w-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
