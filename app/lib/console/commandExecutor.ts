@@ -227,10 +227,13 @@ Available Commands:
 
 Binding Management:
   bind {node}->{port}=>{node}->{port}
-    - Full format: bind cpu->out=>mem->in
-    - From parent: bind out=>mem->in
-    - To parent: bind cpu->out=>in
-    - Multiple: bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
+
+  Format Rules:
+    - Full format: {node}->{port}=>{node}->{port}
+    - From parent: {port}=>{node}->{port} (omit source node)
+    - To parent: {node}->{port}=>{port} (omit target node)
+    - Multiple bindings: Use semicolon (;) to separate
+    - Spaces are optional around arrows and separators
 
   get_bindings [-of_objects <hierarchy>] [-from <pattern>]
 
@@ -238,7 +241,7 @@ Examples:
   bind cpu->out=>mem->in
   bind out=>child1->in
   bind child2->out=>in
-  bind "a->p1=>b->p1; b->p2=>p3"
+  bind a->p1=>b->p1; b->p2=>p3; c->p4=>a->p1
   get_bindings
   get_bindings -of_objects root.cpu
   get_bindings -from root.cpu
