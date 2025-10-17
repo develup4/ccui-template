@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import IPInstanceTreeView from '../components/IPInstanceTreeView';
 import IPInstancePropertyPanel from '../components/IPInstancePropertyPanel';
 import IPInstancePortPanel from '../components/IPInstancePortPanel';
@@ -126,7 +126,7 @@ export default function FullscreenLayout({
   };
 
   // Handle keyboard shortcut for console (Ctrl+`)
-  useCallback(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
@@ -134,10 +134,8 @@ export default function FullscreenLayout({
       }
     };
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
