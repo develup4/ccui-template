@@ -1,15 +1,9 @@
-'use client';
+import HomeContent from "./(home)/home";
 
-import FullscreenLayout from './(layouts)/fullscreen';
-import IPInstanceFlowPanel from './components/IPInstanceFlowPanel';
-import { sampleIPInstanceHierarchy } from './sample-data';
-
-export default function TestTreePage() {
+export default function Home() {
   return (
-    <FullscreenLayout>
-      <div className="flex-1 bg-background">
-        <IPInstanceFlowPanel rootInstance={sampleIPInstanceHierarchy} />
-      </div>
-    </FullscreenLayout>
+    <div className="bg-background text-txt">
+      <HomeContent />
+    </div>
   );
 }
