@@ -3,134 +3,134 @@ generator client {
 }
 
 datasource db {
-    provider = "mysql"
-    url = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
     relationMode = "prisma"
 }
 
 model TEST_DB {
-    CONFIG_KEY String @id @db.VarChar(100)
+    CONFIG_KEY   String @id @db.VarChar(100)
     CONFIG_VALUE String @db.VarChar(100)
 }
 
 model User {
-    id Int @id @default(autoincrement())
-    knoxId String @unique
-    name String
+    id             Int            @id @default(autoincrement())
+    knoxId         String         @unique
+    name           String
     hashedPassword String
-    groupId Int?
-    status UserStatus @default(WAIT_APPROVE)
-    settings Json
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    company String @default("Samsung")
-    dept String @default("Unknown")
-    epid String @default("M")
-    region String @default("ko")
-    group UserGroup? @relation(fields: [groupId], references: [id])
-    projects Project[] @relation("ProjectMember")
-    architectures Architecture[]
-    simulations Simulation[]
+    groupId        Int?
+    status         UserStatus     @default(WAIT_APPROVE)
+    settings       Json
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+    company        String         @default("Samsung")
+    dept           String         @default("Unknown")
+    epid           String         @default("M")
+    region         String         @default("ko")
+    group          UserGroup?     @relation(fields: [groupId], references: [id])
+    projects       Project[]      @relation("ProjectMember")
+    architectures  Architecture[]
+    simulations    Simulation[]
 
     @@index([groupId])
 }
 
 model UserGroup {
-    id Int @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name String @unique
-    users User[]
+    id        Int                    @id @default(autoincrement())
+    createdAt DateTime               @default(now())
+    updatedAt DateTime               @updatedAt
+    name      String                 @unique
+    users     User[]
     baselines BaselineArchitecture[]
-    ipModels IPModel[]
+    ipModels  IPModel[]
     firmwares Firmware[]
     processes ManufacturingProcess[]
 }
 
 model Project {
-    id Int @id @default(autoincrement())
-    deleteFlag Boolean @default(false)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    name String @unique
-    requirement Json
-    favorite Boolean @default(false)
+    id              Int                   @id @default(autoincrement())
+    deleteFlag      Boolean               @default(false)
+    createdAt       DateTime              @default(now())
+    updatedAt       DateTime              @updatedAt
+    name            String                @unique
+    requirement     Json
+    favorite        Boolean               @default(false)
     manufacturingId Int?
-    firmwareId Int?
-    leaderUserId Int
-    firmware Firmware? @relation(fields: [firmwareId], references: [id])
-    manufacturing ManufacturingProcess? @relation(fields: [manufacturingId], references: [id])
-    members User[] @relation("ProjectMember")
-    architectures Architecture[]
-    Simulation Simulation[]
+    firmwareId      Int?
+    leaderUserId    Int
+    firmware        Firmware?             @relation(fields: [firmwareId], references: [id])
+    manufacturing   ManufacturingProcess? @relation(fields: [manufacturingId], references: [id])
+    members         User[]                @relation("ProjectMember")
+    architectures   Architecture[]
+    Simulation      Simulation[]
 
     @@index([firmwareId])
     @@index([manufacturingId])
 }
 
 model Firmware {
-    id Int @id @default(autoincrement())
-    name String
-    repository String
-    type FirmwareType @default(GITHUB)
-    description String?
-    verified Boolean @default(false)
-    createdAt DateTime @default(now())
+    id           Int          @id @default(autoincrement())
+    name         String
+    repository   String
+    type         FirmwareType @default(GITHUB)
+    description  String?
+    verified     Boolean      @default(false)
+    createdAt    DateTime     @default(now())
     ownerGroupId Int
-    updatedAt DateTime @updatedAt
-    ownerGroup UserGroup @relation(fields: [ownerGroupId], references: [id])
-    projects Project[]
+    updatedAt    DateTime     @updatedAt
+    ownerGroup   UserGroup    @relation(fields: [ownerGroupId], references: [id])
+    projects     Project[]
 
     @@index([ownerGroupId])
 }
 
 model ManufacturingProcess {
-    id Int @id @default(autoincrement())
-    name String
-    description String
-    powerData Json
-    areaData Json
-    createdAt DateTime @default(now())
+    id           Int       @id @default(autoincrement())
+    name         String
+    description  String
+    powerData    Json
+    areaData     Json
+    createdAt    DateTime  @default(now())
     ownerGroupId Int
-    updatedAt DateTime @updatedAt
-    ownerGorup UserGroup @relation(fields: [ownerGroupId], references: [id])
-    projects Project[]
+    updatedAt    DateTime  @updatedAt
+    ownerGorup   UserGroup @relation(fields: [ownerGroupId], references: [id])
+    projects     Project[]
 
     @@index([ownerGroupId])
 }
 
 model BaselineArchitecture {
-    id Int @id @default(autoincrement())
-    name String @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    ownerGroupId Int
-    persona Architecture[] @relation("persona")
+    id            Int            @id @default(autoincrement())
+    name          String         @unique
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    ownerGroupId  Int
+    persona       Architecture[] @relation("persona")
     architectures Architecture[]
-    ownerGroup UserGroup @relation(fields: [ownerGroupId], references: [id])
+    ownerGroup    UserGroup      @relation(fields: [ownerGroupId], references: [id])
 
     @@index([ownerGroupId])
 }
 
 model Architecture {
-    id Int @id @default(autoincrement())
-    baselineId Int
-    projectId Int
-    deleteFlag Boolean @default(false)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    creatorId Int
-    name String @unique
-    baselineVersion String @default("1.0.0")
-    ipInstanceId Int
-    storedData Json
-    directorId Int?
+    id              Int                   @id @default(autoincrement())
+    baselineId      Int
+    projectId       Int
+    deleteFlag      Boolean               @default(false)
+    createdAt       DateTime              @default(now())
+    updatedAt       DateTime              @updatedAt
+    creatorId       Int
+    name            String                @unique
+    baselineVersion String                @default("1.0.0")
+    ipInstanceId    Int
+    storedData      Json
+    directorId      Int?
     rangedParameter String?
-    director BaselineArchitecture? @relation("persona", fields: [directorId], references: [id])
-    baseline BaselineArchitecture @relation(fields: [baselineId], references: [id])
-    ipInstance IPInstance @relation(fields: [ipInstanceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    project Project @relation(fields: [projectId], references: [id])
-    creator User @relation(fields: [creatorId], references: [id])
+    director        BaselineArchitecture? @relation("persona", fields: [directorId], references: [id])
+    baseline        BaselineArchitecture  @relation(fields: [baselineId], references: [id])
+    ipInstance      IPInstance            @relation(fields: [ipInstanceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    project         Project               @relation(fields: [projectId], references: [id])
+    creator         User                  @relation(fields: [creatorId], references: [id])
 
     @@index([baselineId])
     @@index([directorId])
@@ -141,16 +141,16 @@ model Architecture {
 
 model IPModel {
     id           Int          @id @default(autoincrement())
-    type         String @unique
+    type         String       @unique
     data         Json // IPModelData in ir-types.ts
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    isComposite  Boolean @default(false)
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+    isComposite  Boolean      @default(false)
     ownerGroupId Int
-    isCustom     Boolean @default(false)
-    isSystem     Boolean @default(false)
-    deleteFlag   Boolean @default(false)
-    ownerGroup   UserGroup @relation(fields: [ownerGroupId], references: [id])
+    isCustom     Boolean      @default(false)
+    isSystem     Boolean      @default(false)
+    deleteFlag   Boolean      @default(false)
+    ownerGroup   UserGroup    @relation(fields: [ownerGroupId], references: [id])
     instances    IPInstance[]
 
     @@index([ownerGroupId])
@@ -160,67 +160,58 @@ model IPInstance {
     id           Int            @id @default(autoincrement())
     name         String
     modelId      Int
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
     data         Json // IPInstanceData in ir-types.ts
     bindings     Json // IPInstanceBindingData in ir-types.ts
-    hierarchy    String @default("system")
+    hierarchy    String         @default("system")
     memo         String
-    modelVersion String @default("1.0.0")
+    modelVersion String         @default("1.0.0")
     parentId     Int?
     architecture Architecture[]
-    model        IPModel @relation(fields: [modelId], references: [id], onDelete: NoAction)
-    parent       IPInstance? @relation("IpInstanceHierarchy", fields: [parentId]. references: [id], onDelete: NoAction, onUpdate: NoAction)
-    children     IPInstance[] @relation("IpInstanceHierarchy")
+    model        IPModel        @relation(fields: [modelId], references: [id], onDelete: NoAction)
+    parent       IPInstance?    @relation("IpInstanceHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    children     IPInstance[]   @relation("IpInstanceHierarchy")
 
     @@index([modelId])
     @@index([parentId])
 }
 
 model IPPortType {
-    id Int @id @default(autoincrement())
-    name String
+    id           Int      @id @default(autoincrement())
+    name         String
     defaultColor String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 }
 
 model Simulator {
-    id Int @id @default(autoincrement())
-    name String @unique
-    explain String
-    icon String
-    options Json
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+    explain   String
+    icon      String
+    options   Json
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
 model Simulation {
-    id Int @id @default(autoincrement())
-    userId Int
-    createdAt DateTime @default(now())
+    id            Int              @id @default(autoincrement())
+    userId        Int
+    createdAt     DateTime         @default(now())
     executionInfo Json
-    irList Json
-    name String @unique
-    projectId Int
-    results Json
-    status SimulationStatus @default(WAIT)
-    jenkinsId Int?
-    updatedAt DateTime @updatedAt
-    executer User @relation(fields: [userId], references: [id])
-    project Project @relation(fields: [projectId], references: [id])
+    irList        Json
+    name          String           @unique
+    projectId     Int
+    results       Json
+    status        SimulationStatus @default(WAIT)
+    jenkinsId     Int?
+    updatedAt     DateTime         @updatedAt
+    executer      User             @relation(fields: [userId], references: [id])
+    project       Project          @relation(fields: [projectId], references: [id])
 
     @@index([userId])
     @@index([projectId])
-}
-
-model ProjectMember {
-    A Int
-    B Int
-    
-    @@unique([[A, B], map: "_ProjectMember_AB_unique"])
-    @@index([B], map: "_ProjectMember_B_index")
-    @@map("_ProjectMember")
 }
 
 enum UserStatus {
