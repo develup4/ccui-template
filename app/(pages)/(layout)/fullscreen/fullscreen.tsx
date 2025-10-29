@@ -6,8 +6,8 @@ import IPInstancePropertyPanel from "../components/IPInstancePropertyPanel";
 import IPInstancePortPanel from "../components/IPInstancePortPanel";
 import IPInstanceBindingPanel from "../components/IPInstanceBindingPanel";
 import Console from "../components/Console";
-import { sampleIPInstanceHierarchy, IPInstance } from "../../../old/sample-data";
-import { IPInstancePort, IPInstanceBinding } from "../../../prisma/ir-types";
+import { sampleIPInstanceHierarchy, IPInstance } from "../../../../old/sample-data";
+import { IPInstancePort, IPInstanceBinding } from "../../../../prisma/ir-types";
 import { ExplorerContext } from "../contexts/ExplorerContext";
 import { logGuiAction } from "../lib/console/commandExecutor";
 

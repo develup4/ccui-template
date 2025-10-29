@@ -1,9 +1,11 @@
-import HomeContent from "./(home)/home";
+import LeftPanel from "./(home)/left";
+import RightPanel from "./(home)/right";
 
 export default function Home() {
   return (
     <div className="bg-background text-txt">
-      <HomeContent />
+      <LeftPanel />
+      <RightPanel />
     </div>
   );
 }
